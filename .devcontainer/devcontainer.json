@@ -1,0 +1,28 @@
+{
+  "name": "Galerna STM32 Dev Container",
+
+  "dockerComposeFile": "../compose.yaml",
+
+  "service": "galerna-build",
+
+  "workspaceFolder": "/workspace",
+
+  "shutdownAction": "stopCompose",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools-extension-pack",
+        "marus25.cortex-debug",
+        "llvm-vs-code-extensions.vscode-clangd"
+      ],
+      "settings": {
+        "cmake.configureOnOpen": false,
+        "cmake.generator": "Ninja",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

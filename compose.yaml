@@ -1,0 +1,11 @@
+services:
+  galerna-build:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: galerna-stm32-build
+    container_name: galerna-build
+    volumes:
+      - .:/workspace
+    stdin_open: true
+    tty: true
