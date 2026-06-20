@@ -1,11 +1,12 @@
 services:
   galerna-build:
-    build: 
+    image: galerna-stm32-build:latest
+    build:
       context: .
       dockerfile: Dockerfile
-    image: galerna-stm32-build
-    container_name: galerna-build
     volumes:
       - .:/workspace
-    stdin_open: true
+    working_dir: /workspace
+    command: bash
     tty: true
+    stdin_open: true

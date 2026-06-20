@@ -1,9 +1,14 @@
 {
-    "cmake.cmakePath": "cmake",
-    "cmake.configureArgs": [
-        "-DCMAKE_COMMAND=cmake"
-    ],
+    "cmake.cmakePath": "/usr/bin/cmake",
+
     "cmake.preferredGenerators": [
         "Ninja"
     ],
+
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy",
+        "--query-driver=/opt/arm-gnu-toolchain/bin/arm-none-eabi-gcc*",
+        "--query-driver=/opt/arm-gnu-toolchain/bin/arm-none-eabi-g++*"
+    ]
 }

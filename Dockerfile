@@ -30,6 +30,11 @@ RUN apt-get update && apt-get install -y \
     git \
     ninja-build \
     build-essential \
+    clang \
+    clangd \
+    clang-tidy \
+    gdb-multiarch \
+    openocd \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
