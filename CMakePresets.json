@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 11,
   "configurePresets": [
     {
       "name": "stm32-base",
@@ -61,6 +61,54 @@
       "output": {
         "outputOnFailure": true
       }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "host-debug-build-and-test",
+      "displayName": "Host Debug: Build and Run Tests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "host-debug"
+        },
+        {
+          "type": "build",
+          "name": "host-debug"
+        },
+        {
+          "type": "test",
+          "name": "host-debug"
+        }
+      ]
+    },
+    {
+      "name": "stm32-debug-build",
+      "displayName": "STM32 Debug: Build",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
+        }
+      ]
+    },
+    {
+      "name": "stm32-release-build",
+      "displayName": "STM32 Release: Build",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release"
+        },
+        {
+          "type": "build",
+          "name": "Release"
+        }
+      ]
     }
   ]
 }

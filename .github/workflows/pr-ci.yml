@@ -1,0 +1,34 @@
+name: Pull Request CI
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pr-ci:
+    name : PR CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (cache via GHA)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          tags: galerna-stm32-build:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run test
+        run: docker compose run --rm galerna-build cmake --workflow host-debug-build-and-test
+
+      - name: Debug build
+        run: docker compose run --rm galerna-build cmake --workflow stm32-debug-build
+
+      - name: Release build
+        run: docker compose run --rm galerna-build cmake --workflow stm32-release-build
