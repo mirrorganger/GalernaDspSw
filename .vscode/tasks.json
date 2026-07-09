@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Galerna: STM32 Debug Build",
+      "type": "shell",
+      "command": "cmake --workflow --preset stm32-debug-build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: STM32 Release Build",
+      "type": "shell",
+      "command": "cmake --workflow --preset stm32-release-build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash STM32 Debug",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/Galerna.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Debug Build",
+      "problemMatcher": []
+    }
+  ]
+}
