@@ -70,6 +70,9 @@ if(GALERNA_BUILD_STM32)
     # Main firmware executable. The CubeMX CMake file adds Core/Src/*.c,
     # startup_stm32f405xx.s, STM32 HAL/CMSIS sources, include paths and defines.
     add_executable(${CMAKE_PROJECT_NAME})
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+        Application/Src/swo_debug.cpp
+    )
 
     # STM32CubeMX generated sources and libraries.
     add_subdirectory(cmake/stm32cubemx)
@@ -132,6 +135,8 @@ if(GALERNA_BUILD_TESTS)
 
     add_executable(galerna_tests
         Tests/Core/test_processor_chain.cpp
+        Tests/Core/test_test_tone.cpp
+        Tests/Drivers/test_es8388_codec.cpp
         Tests/Drivers/test_wm8731_codec.cpp
         Tests/Drivers/test_pot_mux_4051.cpp
     )

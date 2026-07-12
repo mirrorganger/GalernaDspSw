@@ -23,6 +23,13 @@
       "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/Galerna.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Debug Build",
       "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash STM32 Release",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/Galerna.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Release Build",
+      "problemMatcher": []
     }
   ]
 }
