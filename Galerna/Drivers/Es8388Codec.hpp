@@ -13,18 +13,18 @@ class Es8388Codec
 {
 public:
     explicit Es8388Codec(TI2c& i2c)
-        : i2c_{i2c}
+        : _i2c{i2c}
     {
     }
 
     bool isPresent()
     {
-        return i2c_.isDeviceReady(deviceAddress);
+        return _i2c.isDeviceReady(deviceAddress);
     }
 
     bool reset()
     {
-        return writeRegister(0x00, 0x80);
+        return writeRegister({0x00, 0x80});
     }
 
     bool configureForI2sDacPlayback()
@@ -58,12 +58,6 @@ public:
         return writeRegisters(script);
     }
 
-    bool writeRegister(std::uint8_t reg, std::uint8_t value)
-    {
-        const std::array<std::uint8_t, 2> data{reg, value};
-        return i2c_.write(deviceAddress, data);
-    }
-
     static constexpr std::uint8_t deviceAddress{0x10};
 
 private:
@@ -73,12 +67,11 @@ private:
         std::uint8_t value;
     };
 
-    template <std::size_t N>
-    bool writeRegisters(const std::array<RegisterWrite, N>& registersWrite)
+    bool writeRegisters(std::span<const RegisterWrite> registersWrite)
     {
         for (const auto& registerWrite : registersWrite)
         {
-            if (!writeRegister(registerWrite.reg, registerWrite.value))
+            if (!writeRegister(registerWrite))
             {
                 return false;
             }
@@ -86,7 +79,14 @@ private:
         return true;
     }
 
-    TI2c& i2c_;
+    bool writeRegister(const RegisterWrite& registerWrite)
+    {
+        const std::array<std::uint8_t, 2> data{registerWrite.reg, registerWrite.value};
+        return _i2c.write(deviceAddress, data);
+    }
+
+
+    TI2c& _i2c;
 };
 
 } // namespace galerna::drivers

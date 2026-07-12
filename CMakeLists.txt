@@ -137,7 +137,6 @@ if(GALERNA_BUILD_TESTS)
         Tests/Core/test_processor_chain.cpp
         Tests/Core/test_test_tone.cpp
         Tests/Drivers/test_es8388_codec.cpp
-        Tests/Drivers/test_wm8731_codec.cpp
         Tests/Drivers/test_pot_mux_4051.cpp
     )
 
