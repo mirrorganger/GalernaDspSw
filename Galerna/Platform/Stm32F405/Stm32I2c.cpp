@@ -8,6 +8,15 @@ Stm32I2c::Stm32I2c(I2C_HandleTypeDef& handle)
 {
 }
 
+bool Stm32I2c::isDeviceReady(std::uint8_t address)
+{
+    return HAL_I2C_IsDeviceReady(
+               &handle_,
+               static_cast<std::uint16_t>(address << 1U),
+               3U,
+               100U) == HAL_OK;
+}
+
 bool Stm32I2c::write(std::uint8_t address, std::span<const std::uint8_t> data)
 {
     return HAL_I2C_Master_Transmit(
