@@ -2,7 +2,9 @@
 #include "Tests/Fakes/FakeAdc.hpp"
 #include "Tests/Fakes/FakeGpio.hpp"
 
+#include <array>
 #include <catch2/catch_test_macros.hpp>
+#include <functional>
 
 TEST_CASE("PotMux4051 selects requested mux channel")
 {
@@ -10,8 +12,9 @@ TEST_CASE("PotMux4051 selects requested mux channel")
     FakeGpio s0;
     FakeGpio s1;
     FakeGpio s2;
+    std::array<std::reference_wrapper<FakeGpio>, 3> selectLines{std::ref(s0), std::ref(s1), std::ref(s2)};
 
-    galerna::drivers::PotMux4051 mux{adc, s0, s1, s2, 5};
+    galerna::drivers::PotMux4051 mux{adc, selectLines, 5};
 
     const auto value = mux.read(6);
 
