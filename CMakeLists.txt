@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -34,7 +34,7 @@ add_library(galerna_core INTERFACE)
 target_include_directories(galerna_core INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_compile_features(galerna_core INTERFACE cxx_std_20)
+target_compile_features(galerna_core INTERFACE cxx_std_23)
 
 add_library(galerna_effects INTERFACE)
 target_include_directories(galerna_effects INTERFACE
@@ -70,6 +70,9 @@ if(GALERNA_BUILD_STM32)
     # Main firmware executable. The CubeMX CMake file adds Core/Src/*.c,
     # startup_stm32f405xx.s, STM32 HAL/CMSIS sources, include paths and defines.
     add_executable(${CMAKE_PROJECT_NAME})
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+        Application/Src/swo_debug.cpp
+    )
 
     # STM32CubeMX generated sources and libraries.
     add_subdirectory(cmake/stm32cubemx)
@@ -77,6 +80,7 @@ if(GALERNA_BUILD_STM32)
     add_library(galerna_platform_stm32 STATIC
         Galerna/Platform/Stm32F405/Stm32Gpio.cpp
         Galerna/Platform/Stm32F405/Stm32I2c.cpp
+        Galerna/Platform/Stm32F405/Stm32Adc.cpp
     )
 
     target_link_libraries(galerna_platform_stm32 PUBLIC
@@ -131,8 +135,10 @@ if(GALERNA_BUILD_TESTS)
     enable_testing()
 
     add_executable(galerna_tests
+        Tests/App/test_galerna_app.cpp
         Tests/Core/test_processor_chain.cpp
-        Tests/Drivers/test_wm8731_codec.cpp
+        Tests/Core/test_test_tone.cpp
+        Tests/Drivers/test_es8388_codec.cpp
         Tests/Drivers/test_pot_mux_4051.cpp
     )
 

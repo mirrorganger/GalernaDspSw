@@ -13,6 +13,7 @@ class Stm32I2c
 public:
     explicit Stm32I2c(I2C_HandleTypeDef& handle);
 
+    bool isDeviceReady(std::uint8_t address);
     bool write(std::uint8_t address, std::span<const std::uint8_t> data);
 
 private:

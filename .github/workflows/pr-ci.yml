@@ -24,6 +24,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Set container user to match runner UID/GID
+        run: |
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
+
       - name: Run test
         run: docker compose run --rm galerna-build cmake --workflow host-debug-build-and-test
 
