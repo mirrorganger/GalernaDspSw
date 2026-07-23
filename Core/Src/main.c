@@ -106,7 +106,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SDIO_SD_Init();
+  // MX_SDIO_SD_Init();
   MX_SPI1_Init();
   MX_I2S2_Init();
   MX_USB_OTG_FS_PCD_Init();
@@ -434,7 +434,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : PUSH_BTN_1_Pin PUSH_BTN_0_Pin */
   GPIO_InitStruct.Pin = PUSH_BTN_1_Pin|PUSH_BTN_0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_0_Pin LED_1_Pin LED_2_Pin OLED_DC_Pin */

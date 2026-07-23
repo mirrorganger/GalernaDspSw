@@ -3,43 +3,68 @@
 #include "Galerna/Hal/AdcConcept.hpp"
 #include "Galerna/Hal/GpioConcept.hpp"
 
+#include <array>
 #include <cstdint>
+#include <functional>
+#include <ranges>
+#include <utility>
 
 namespace galerna::drivers
 {
 
-template <hal::Adc TAdc, hal::Gpio TS0, hal::Gpio TS1, hal::Gpio TS2>
+namespace detail
+{
+
+template <std::size_t... Bits>
+constexpr std::array<bool, sizeof...(Bits)> toBitArray(std::uint8_t value, std::index_sequence<Bits...>)
+{
+    return {(((value >> Bits) & 1U) != 0U)...};
+}
+
+template <std::size_t SelectLineCount, std::size_t... Channels>
+constexpr std::array<std::array<bool, SelectLineCount>, sizeof...(Channels)> makeChannelBitsTable(
+    std::index_sequence<Channels...>)
+{
+    return {toBitArray(static_cast<std::uint8_t>(Channels), std::make_index_sequence<SelectLineCount>{})...};
+}
+
+} // namespace detail
+
+template <hal::Adc TAdc, hal::Gpio TGpio>
 class PotMux4051
 {
 public:
-    PotMux4051(TAdc& adc, TS0& s0, TS1& s1, TS2& s2, std::uint8_t adcChannel)
-        : adc_{adc}
-        , s0_{s0}
-        , s1_{s1}
-        , s2_{s2}
-        , adcChannel_{adcChannel}
+    static constexpr std::size_t selectLineCount{3};
+    static constexpr std::size_t channelCount{std::size_t{1} << selectLineCount};
+
+    PotMux4051(TAdc& adc, std::array<std::reference_wrapper<TGpio>, selectLineCount> selectLines, std::uint8_t adcChannel)
+        : _adc{adc}
+        , _selectLines{selectLines}
+        , _adcChannel{adcChannel}
     {
     }
 
     std::uint16_t read(std::uint8_t muxChannel)
     {
         select(muxChannel);
-        return adc_.read(adcChannel_);
+        return _adc.read(_adcChannel);
     }
 
     void select(std::uint8_t muxChannel)
     {
-        s0_.set((muxChannel & 0x01U) != 0U);
-        s1_.set((muxChannel & 0x02U) != 0U);
-        s2_.set((muxChannel & 0x04U) != 0U);
+        for (auto [line, bit] : std::views::zip(_selectLines, channelBitsTable[muxChannel]))
+        {
+            line.get().set(bit);
+        }
     }
 
 private:
-    TAdc& adc_;
-    TS0& s0_;
-    TS1& s1_;
-    TS2& s2_;
-    std::uint8_t adcChannel_{};
+    static constexpr auto channelBitsTable{
+        detail::makeChannelBitsTable<selectLineCount>(std::make_index_sequence<channelCount>{})};
+
+    TAdc& _adc;
+    std::array<std::reference_wrapper<TGpio>, selectLineCount> _selectLines;
+    std::uint8_t _adcChannel{};
 };
 
 } // namespace galerna::drivers
