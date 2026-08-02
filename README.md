@@ -1,5 +1,7 @@
 # Galerna DSP Software
 
+[![CI](https://github.com/mirrorganger/GalernaDspSw/actions/workflows/pr-ci.yml/badge.svg?branch=main)](https://github.com/mirrorganger/GalernaDspSw/actions/workflows/pr-ci.yml)
+
 STM32F405-based audio DSP firmware for the Galerna board.
 
 This repository keeps the STM32CubeMX-generated firmware project intact and adds a modern C++20 Galerna layer using concepts and template-based dependency injection.
