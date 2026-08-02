@@ -8,9 +8,9 @@ This repository keeps the STM32CubeMX-generated firmware project intact and adds
 
 ## Important directories
 
-- `Core/` — STM32CubeMX generated application code.
+- `Core/` — Application/init code, originally scaffolded by STM32CubeMX, now hand-maintained.
 - `Drivers/` — STM32 HAL/CMSIS files.
-- `cmake/stm32cubemx/` — STM32CubeMX generated CMake integration.
+- `cmake/stm32cubemx/` — CMake integration, originally scaffolded by STM32CubeMX, now hand-maintained.
 - `startup_stm32f405xx.s` — STM32 startup file.
 - `STM32F405XX_FLASH.ld` — STM32 linker script.
 - `Application/` — C/C++ bridge called from CubeMX `main.c`.
