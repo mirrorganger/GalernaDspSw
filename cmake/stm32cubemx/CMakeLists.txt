@@ -67,11 +67,20 @@ set(MX_LINK_DIRS
 
 )
 # Project static libraries
-set(MX_LINK_LIBS 
+set(MX_LINK_LIBS
     STM32_Drivers
     ${TOOLCHAIN_LINK_LIBRARIES}
-    
+
 )
+
+# galerna_configure_cubemx_target() (below) is called from the top-level CMakeLists.txt via
+# galerna_add_app() -- a CMake function body looks up variables in the scope of its *caller*,
+# not the scope where the function was defined, so these need to be promoted into this
+# directory's parent (the top level) or they'd be invisible/empty when that function runs.
+set(MX_Application_Src ${MX_Application_Src} PARENT_SCOPE)
+set(MX_LINK_DIRS ${MX_LINK_DIRS} PARENT_SCOPE)
+set(MX_LINK_LIBS ${MX_LINK_LIBS} PARENT_SCOPE)
+
 # Interface library for includes and symbols
 add_library(stm32cubemx INTERFACE)
 target_include_directories(stm32cubemx INTERFACE ${MX_Include_Dirs})
@@ -83,17 +92,16 @@ target_sources(STM32_Drivers PRIVATE ${STM32_Drivers_Src})
 target_link_libraries(STM32_Drivers PUBLIC stm32cubemx)
 
 
-# Add STM32CubeMX generated application sources to the project
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${MX_Application_Src})
-
-# Link directories setup
-target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE ${MX_LINK_DIRS})
-
-# Add libraries to the project
-target_link_libraries(${CMAKE_PROJECT_NAME} ${MX_LINK_LIBS})
-
-# Add the map file to the list of files to be removed with 'clean' target
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES ADDITIONAL_CLEAN_FILES ${CMAKE_PROJECT_NAME}.map)
+# Attaches the STM32CubeMX generated application sources/link settings to an app-specific
+# executable target. Called once per app (see galerna_add_app() in the top-level
+# CMakeLists.txt) so each app gets its own independently flashable .elf sharing this same
+# CubeMX-generated bring-up code.
+function(galerna_configure_cubemx_target target)
+    target_sources(${target} PRIVATE ${MX_Application_Src})
+    target_link_directories(${target} PRIVATE ${MX_LINK_DIRS})
+    target_link_libraries(${target} PRIVATE ${MX_LINK_LIBS})
+    set_target_properties(${target} PROPERTIES ADDITIONAL_CLEAN_FILES ${target}.map)
+endfunction()
 
 # Validate that STM32CubeMX code is compatible with C standard
 if((CMAKE_C_STANDARD EQUAL 90) OR (CMAKE_C_STANDARD EQUAL 99))

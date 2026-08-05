@@ -67,13 +67,6 @@ target_link_libraries(galerna_app INTERFACE
 # -----------------------------------------------------------------------------
 
 if(GALERNA_BUILD_STM32)
-    # Main firmware executable. The CubeMX CMake file adds Core/Src/*.c,
-    # startup_stm32f405xx.s, STM32 HAL/CMSIS sources, include paths and defines.
-    add_executable(${CMAKE_PROJECT_NAME})
-    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-        Application/Src/swo_debug.cpp
-    )
-
     # STM32CubeMX generated sources and libraries.
     add_subdirectory(cmake/stm32cubemx)
 
@@ -92,29 +85,45 @@ if(GALERNA_BUILD_STM32)
         GALERNA_STM32_TARGET
     )
 
-    add_library(application_cpp STATIC
-        Application/Src/app.cpp
-    )
-
-    target_include_directories(application_cpp PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Application/Inc
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    target_link_libraries(application_cpp PUBLIC
-        galerna_app
-        galerna_platform_stm32
-        stm32cubemx
-    )
-
     # Remove wrong libob.a library dependency when using C++ files.
     list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 
-    target_link_libraries(${CMAKE_PROJECT_NAME} 
-        application_cpp
-        stm32cubemx
-        STM32_Drivers
-    )
+    # Defines one independently-buildable, independently-flashable firmware executable for
+    # the app living in Applications/<name>/app.cpp. Every app shares the same CubeMX
+    # bring-up (main.c et al, via galerna_configure_cubemx_target()), HAL drivers, and
+    # Galerna platform/core/effects/app libraries -- only Applications/<name>/app.cpp (the
+    # hardware wiring + which Galerna/App/*.hpp app class to run) differs between them.
+    function(galerna_add_app name)
+        add_executable(${name})
+        target_sources(${name} PRIVATE
+            Applications/${name}/app.cpp
+            Application/Src/swo_debug.cpp
+            # Directly on the executable target, not in galerna_platform_stm32 (a static
+            # archive): HAL's own stm32f4xx_hal_i2s_ex.c.o both calls and __weak-defines
+            # these same callback names, so it self-satisfies the reference and the linker
+            # never has an unresolved symbol to pull this override in for if it's just an
+            # unreferenced archive member. Being a directly-compiled source of the
+            # executable makes it unconditionally linked.
+            Galerna/Platform/Stm32F405/Stm32I2sDuplexAudioCallbacks.cpp
+        )
+
+        target_include_directories(${name} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/Application/Inc
+            ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+
+        target_link_libraries(${name} PRIVATE
+            galerna_app
+            galerna_platform_stm32
+            stm32cubemx
+        )
+
+        galerna_configure_cubemx_target(${name})
+        target_link_libraries(${name} PRIVATE STM32_Drivers)
+    endfunction()
+
+    galerna_add_app(ThxDeepNote)
+    galerna_add_app(PotBlink)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -135,11 +144,18 @@ if(GALERNA_BUILD_TESTS)
     enable_testing()
 
     add_executable(galerna_tests
+        Tests/App/test_binary_led_display.cpp
         Tests/App/test_galerna_app.cpp
+        Tests/Core/test_duplex_audio_block_processor.cpp
         Tests/Core/test_processor_chain.cpp
+        Tests/Core/test_state_variable_filter.cpp
         Tests/Core/test_test_tone.cpp
+        Tests/Core/test_thx_voice.cpp
+        Tests/Core/test_wavetable_oscillator.cpp
         Tests/Drivers/test_es8388_codec.cpp
         Tests/Drivers/test_pot_mux_4051.cpp
+        Tests/Effects/test_thx_deep_note.cpp
+        Tests/App/test_thx_deep_note_app.cpp
     )
 
     target_link_libraries(galerna_tests PRIVATE

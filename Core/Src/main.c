@@ -46,6 +46,8 @@ ADC_HandleTypeDef hadc1;
 I2C_HandleTypeDef hi2c2;
 
 I2S_HandleTypeDef hi2s2;
+DMA_HandleTypeDef hdma_spi2_tx;
+DMA_HandleTypeDef hdma_i2s2_ext_rx;
 
 SD_HandleTypeDef hsd;
 
@@ -60,6 +62,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_I2S2_Init(void);
@@ -104,6 +107,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   // MX_SDIO_SD_Init();
   MX_SPI1_Init();
   MX_I2S2_Init();
@@ -256,6 +260,25 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 2 */
 
+}
+
+/**
+  * @brief DMA Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DMA_Init(void)
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream3_IRQn: I2S2ext_RX (line-in, ES8388 ADC -> MCU) */
+  HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+  /* DMA1_Stream4_IRQn: SPI2_TX (line-out, MCU -> ES8388 DAC) */
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
 }
 
 /**
