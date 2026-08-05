@@ -8,7 +8,7 @@
       "servertype": "openocd",
       "showDevDebugOutput": "raw",
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/thx_deep_note.elf",
+      "executable": "${workspaceFolder}/build/Debug/applications/thx_deep_note.elf",
       "device": "STM32F405RG",
       "interface": "swd",
       "configFiles": [
@@ -38,7 +38,7 @@
       "servertype": "openocd",
       "showDevDebugOutput": "raw",
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/pot_blink.elf",
+      "executable": "${workspaceFolder}/build/Debug/applications/pot_blink.elf",
       "device": "STM32F405RG",
       "interface": "swd",
       "configFiles": [
