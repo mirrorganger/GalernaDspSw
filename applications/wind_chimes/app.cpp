@@ -85,7 +85,7 @@ galerna::app::WindChimesApp<
     windChimesApp{
         statusLeds,
         potMux,
-        {.density = 1U, .spread = 3U, .timbre = 5U, .resonance = 7U, .voiceCount = 6U},
+        {.density = 1U, .spread = 3U, .decay = 2U, .timbre = 5U, .resonance = 7U, .voiceCount = 6U},
         audioEngine,
         audioWindChimes,
         audioSampleRateHz};

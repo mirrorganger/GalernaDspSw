@@ -52,10 +52,14 @@ public:
 
     // density: 0..1, higher shortens the average wait between strikes.
     // spread: 0..1, higher widens how many octaves above the scale root a strike can land on.
-    void update(float density, float spread)
+    // ringDurationS: how long (in seconds) a struck note takes to decay from full amplitude down
+    // to silenceThreshold; clamped away from 0 (division by ringSamples in strike()) and to a
+    // sane upper bound regardless of what the caller passes in.
+    void update(float density, float spread, float ringDurationS)
     {
         _density = std::clamp(density, 0.0F, 1.0F);
         _spread = std::clamp(spread, 0.0F, 1.0F);
+        _ringDurationS = std::clamp(ringDurationS, minRingDurationS, maxRingDurationS);
     }
 
     [[gnu::always_inline]] float process()
@@ -94,17 +98,16 @@ private:
         ringing
     };
 
-    // How long a struck note takes to decay from full amplitude down to silenceThreshold,
-    // expressed as a per-sample multiplier so ringDurationS is independent of sample rate.
-    static constexpr float ringDurationS{1.4F};
     static constexpr float silenceThreshold{0.001F};
+    static constexpr float minRingDurationS{0.05F};
+    static constexpr float maxRingDurationS{6.0F};
     // minIntervalS only bounds the *wait* before a strike, not the strike-to-strike rate: a
     // voice can't re-strike until its current ring has decayed below silenceThreshold (see
     // process()), so at maximum density a single voice's real cycle time is close to
-    // ringDurationS + a small jittered fraction of minIntervalS, not minIntervalS itself. Lower
-    // ringDurationS too if a faster max density should be audible on a single voice rather
-    // than just tightening how closely staggered voices in the bank can land on top of
-    // each other.
+    // ringDurationS + a small jittered fraction of minIntervalS, not minIntervalS itself. The
+    // Decay control (see WindChimes::setDecay()) shortens ringDurationS itself if a faster max
+    // density should be audible on a single voice rather than just tightening how closely
+    // staggered voices in the bank can land on top of each other.
     static constexpr float minIntervalS{0.05F};
     static constexpr float maxIntervalS{4.0F};
     // Highest octave a strike can be shifted up by, reached at spread == 1.
@@ -124,7 +127,7 @@ private:
         _osc.setFrequency(frequencyHz);
         _frequencyHz = frequencyHz;
         _amplitude = 1.0F;
-        const float ringSamples = ringDurationS * _sampleRate;
+        const float ringSamples = _ringDurationS * _sampleRate;
         _decayPerSample = std::pow(silenceThreshold, 1.0F / ringSamples);
         _state = State::ringing;
     }
@@ -143,6 +146,7 @@ private:
     float _sampleRate{1.0F};
     float _density{0.5F};
     float _spread{0.5F};
+    float _ringDurationS{1.4F};
     float _amplitude{0.0F};
     float _decayPerSample{1.0F};
     float _frequencyHz{lowestFrequencyHz};

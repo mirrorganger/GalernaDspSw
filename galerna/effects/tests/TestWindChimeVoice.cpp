@@ -19,7 +19,7 @@ TEST_CASE("WindChimeVoice falls silent again after its first strike rings out, a
 {
     galerna::effects::WindChimeVoice voice;
     voice.init(48'000.0F, 1U);
-    voice.update(0.0F, 0.5F); // density 0 -> longest possible wait before the *next* strike
+    voice.update(0.0F, 0.5F, 1.4F); // density 0 -> longest possible wait before the *next* strike
 
     // ringDurationS (1.4s) worth of samples, plus margin, is enough for the immediate first
     // strike to decay below silenceThreshold and hand control back to the (very long, at
@@ -37,11 +37,35 @@ TEST_CASE("WindChimeVoice falls silent again after its first strike rings out, a
     }
 }
 
+TEST_CASE("WindChimeVoice decay controls how long a struck note keeps ringing")
+{
+    // Same seed and density 0 on both -> same single strike at t=0 (immediate first strike, see
+    // init()) with the next one at least 2s away, isolating decay's effect on that one strike.
+    galerna::effects::WindChimeVoice shortDecay;
+    shortDecay.init(48'000.0F, 5U);
+    shortDecay.update(0.0F, 1.0F, 0.1F);
+
+    galerna::effects::WindChimeVoice longDecay;
+    longDecay.init(48'000.0F, 5U);
+    longDecay.update(0.0F, 1.0F, 5.0F);
+
+    for (int sample = 0; sample < 48'000; ++sample)
+    {
+        shortDecay.process();
+        longDecay.process();
+    }
+
+    // One second in: the 0.1s-decay voice's only strike so far has long since rung out, while
+    // the 5.0s-decay voice (same strike) is still well within its ring.
+    REQUIRE(shortDecay.process() == 0.0F);
+    REQUIRE(longDecay.process() != 0.0F);
+}
+
 TEST_CASE("WindChimeVoice eventually strikes and rings out at maximum density")
 {
     galerna::effects::WindChimeVoice voice;
     voice.init(48'000.0F, 2U);
-    voice.update(1.0F, 1.0F); // density 1 -> shortest possible wait before striking
+    voice.update(1.0F, 1.0F, 1.4F); // density 1 -> shortest possible wait before striking
 
     bool everNonZero = false;
     for (int sample = 0; sample < 48'000 * 2; ++sample)
@@ -60,7 +84,7 @@ TEST_CASE("WindChimeVoice frequency stays within its documented chime range")
 {
     galerna::effects::WindChimeVoice voice;
     voice.init(48'000.0F, 3U);
-    voice.update(1.0F, 1.0F); // spread 1 -> widest possible octave range, most likely to escape bounds
+    voice.update(1.0F, 1.0F, 1.4F); // spread 1 -> widest possible octave range, most likely to escape bounds
 
     for (int sample = 0; sample < 48'000 * 4; ++sample)
     {
@@ -74,11 +98,11 @@ TEST_CASE("WindChimeVoice with the same seed and controls repeats the same sched
 {
     galerna::effects::WindChimeVoice first;
     first.init(48'000.0F, 42U);
-    first.update(1.0F, 1.0F);
+    first.update(1.0F, 1.0F, 1.4F);
 
     galerna::effects::WindChimeVoice second;
     second.init(48'000.0F, 42U);
-    second.update(1.0F, 1.0F);
+    second.update(1.0F, 1.0F, 1.4F);
 
     for (int sample = 0; sample < 48'000; ++sample)
     {
@@ -90,11 +114,11 @@ TEST_CASE("WindChimeVoice with different seeds diverges")
 {
     galerna::effects::WindChimeVoice first;
     first.init(48'000.0F, 1U);
-    first.update(1.0F, 1.0F);
+    first.update(1.0F, 1.0F, 1.4F);
 
     galerna::effects::WindChimeVoice second;
     second.init(48'000.0F, 99U);
-    second.update(1.0F, 1.0F);
+    second.update(1.0F, 1.0F, 1.4F);
 
     bool everDifferent = false;
     for (int sample = 0; sample < 48'000; ++sample)

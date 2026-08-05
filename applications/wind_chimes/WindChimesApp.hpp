@@ -13,9 +13,9 @@
 namespace galerna::app
 {
 
-// Drives the WindChimes synth demo at control rate: reads 5 PotMux4051 channels into the synth's
-// density/spread/timbre/resonance/voiceCount controls and mirrors the resulting active voice
-// count on the status LEDs in binary (see displayBinary()). Same shape as ThxDeepNoteApp --
+// Drives the WindChimes synth demo at control rate: reads 6 PotMux4051 channels into the synth's
+// density/spread/decay/timbre/resonance/voiceCount controls and mirrors the resulting active
+// voice count on the status LEDs in binary (see displayBinary()). Same shape as ThxDeepNoteApp --
 // TAudioEngine/TEffect are duck-typed for the same reason (always the single concrete
 // Stm32I2sDuplexAudio<...>/WindChimes instances constructed once per app, not swapped for host
 // fakes). Codec bring-up stays a free function in applications/wind_chimes/app.cpp, same
@@ -32,6 +32,7 @@ public:
     {
         std::uint8_t density;
         std::uint8_t spread;
+        std::uint8_t decay;
         std::uint8_t timbre;
         std::uint8_t resonance;
         std::uint8_t voiceCount;
@@ -61,13 +62,14 @@ public:
         return _audioEngine.start();
     }
 
-    // Reads the 5 WindChimes control pots, applies them to the effect, and mirrors the resulting
+    // Reads the 6 WindChimes control pots, applies them to the effect, and mirrors the resulting
     // active voice count on the status LEDs. Returns the active voice count applied so the
     // caller can also use it for diagnostics.
     std::size_t tick()
     {
         _effect.setDensity(readNormalized(_potMuxChannels.density));
         _effect.setSpread(readNormalized(_potMuxChannels.spread));
+        _effect.setDecay(readNormalized(_potMuxChannels.decay));
         _effect.setTimbre(readNormalized(_potMuxChannels.timbre));
         _effect.setResonance(readNormalized(_potMuxChannels.resonance));
 

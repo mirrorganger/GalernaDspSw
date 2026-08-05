@@ -23,14 +23,16 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   driven by `WindChimesApp`) where a bank of independently-scheduled `WindChimeVoice` "strikers"
   wait a randomized interval, then ring out a note from a pentatonic scale and decay, like a
   physical chime struck by the wind — streamed to line-out over I2S DMA
-  (`Stm32I2sDuplexAudio`). Five potentiometers control strike density, pitch spread (octave
-  range), filter timbre/resonance, and active voice count; the status LEDs mirror the voice
-  count in binary. Also brings up the ES8388 codec over I2C before starting the audio engine.
+  (`Stm32I2sDuplexAudio`). Six potentiometers control strike density, pitch spread (octave
+  range), decay time, filter timbre/resonance, and active voice count; the status LEDs mirror
+  the voice count in binary. Also brings up the ES8388 codec over I2C before starting the audio
+  engine.
 
   | Control | Physical pot | Effect |
   |---|---|---|
   | Density | `POT_5` | How often voices strike: 0 = rare (up to ~6 s apart), 1 = frequent (~0.1-0.2 s apart). |
   | Spread | `POT_7` | How many octaves above the scale root a strike can land on, 0 (root only) – 1 (up to 3 octaves up). |
+  | Decay | `POT_1` | How long a struck note rings out, exponential 0.2 s (short, plucky) – 3 s (long, sustained). |
   | Timbre | `POT_4` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). |
   | Resonance | `POT_8` | Filter resonance, 0 (clean) – 1 (near self-oscillation). |
   | Voice count | `POT_6` | How many of the 8 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |

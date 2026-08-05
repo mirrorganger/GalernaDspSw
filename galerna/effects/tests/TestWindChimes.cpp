@@ -97,6 +97,31 @@ TEST_CASE("WindChimes timbre changes the generated signal")
     REQUIRE(leftDark != leftBright);
 }
 
+TEST_CASE("WindChimes decay changes the generated signal")
+{
+    galerna::effects::WindChimes chimesShort;
+    chimesShort.init(48'000.0F);
+    chimesShort.setDensity(1.0F);
+    chimesShort.setDecay(0.0F);
+
+    galerna::effects::WindChimes chimesLong;
+    chimesLong.init(48'000.0F);
+    chimesLong.setDensity(1.0F);
+    chimesLong.setDecay(1.0F);
+
+    std::array<float, 48'000> leftShort{};
+    std::array<float, 48'000> rightShort{};
+    std::array<float, 48'000> leftLong{};
+    std::array<float, 48'000> rightLong{};
+    galerna::core::AudioBuffer bufferShort{leftShort, rightShort};
+    galerna::core::AudioBuffer bufferLong{leftLong, rightLong};
+
+    chimesShort.processBlock(bufferShort);
+    chimesLong.processBlock(bufferLong);
+
+    REQUIRE(leftShort != leftLong);
+}
+
 TEST_CASE("WindChimes active voice count limits how many voices are summed")
 {
     galerna::effects::WindChimes chimesFew;

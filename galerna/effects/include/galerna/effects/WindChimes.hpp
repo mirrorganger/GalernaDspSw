@@ -41,6 +41,7 @@ public:
         setResonance(0.0F);
         setDensity(0.5F);
         setSpread(0.5F);
+        setDecay(0.5F);
     }
 
     // density: 0..1, how often voices strike (0 = rare, sparse chimes; 1 = frequent, busy).
@@ -53,6 +54,14 @@ public:
     void setSpread(float spread)
     {
         _spread = std::clamp(spread, 0.0F, 1.0F);
+    }
+
+    // decay: 0..1, exponentially maps to how long (in seconds) a struck note takes to ring out,
+    // between minDecayS (short, plucky) and maxDecayS (long, sustained bell tails).
+    void setDecay(float decay)
+    {
+        const float normalized = std::clamp(decay, 0.0F, 1.0F);
+        _ringDurationS = minDecayS * std::pow(maxDecayS / minDecayS, normalized);
     }
 
     // timbre: 0..1, exponentially maps to the filter cutoff between minCutoffHz and maxCutoffHz
@@ -95,7 +104,7 @@ public:
 
         for (std::size_t voice = 0U; voice < _activeVoiceCount; ++voice)
         {
-            _voices[voice].update(_density, _spread);
+            _voices[voice].update(_density, _spread, _ringDurationS);
         }
 
         const float scale = headroom / static_cast<float>(_activeVoiceCount);
@@ -119,6 +128,8 @@ private:
     static constexpr float headroom{2.0F};
     static constexpr float minCutoffHz{150.0F};
     static constexpr float maxCutoffHz{5'000.0F};
+    static constexpr float minDecayS{0.2F};
+    static constexpr float maxDecayS{3.0F};
     static constexpr std::array<std::uint32_t, voiceCount> seedTable{
         0x9E3779B9U,
         0x85EBCA6BU,
@@ -133,6 +144,7 @@ private:
     std::size_t _activeVoiceCount{voiceCount};
     float _density{0.5F};
     float _spread{0.5F};
+    float _ringDurationS{1.4F};
     core::StateVariableFilter _filter;
     float _resonanceOutputCompensation{1.0F};
 };
