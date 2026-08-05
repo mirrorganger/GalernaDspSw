@@ -18,16 +18,30 @@
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash STM32 Debug",
+      "label": "Galerna: Flash ThxDeepNote (Debug)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/Galerna.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/ThxDeepNote.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Debug Build",
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash STM32 Release",
+      "label": "Galerna: Flash ThxDeepNote (Release)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/Galerna.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/ThxDeepNote.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Release Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash PotBlink (Debug)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/PotBlink.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Debug Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash PotBlink (Release)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/PotBlink.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Release Build",
       "problemMatcher": []
     }
