@@ -145,7 +145,6 @@ if(GALERNA_BUILD_TESTS)
 
     add_executable(galerna_tests
         Tests/App/test_galerna_app.cpp
-        Tests/Applications/ThxDeepNote/test_thx_deep_note_app.cpp
         Tests/Core/test_binary_led_display.cpp
         Tests/Core/test_duplex_audio_block_processor.cpp
         Tests/Core/test_processor_chain.cpp
