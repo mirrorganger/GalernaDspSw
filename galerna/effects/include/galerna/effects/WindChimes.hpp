@@ -20,7 +20,14 @@ namespace galerna::effects
 class WindChimes
 {
 public:
-    static constexpr std::size_t voiceCount{6U};
+    // WindChimeVoice is cheaper per-sample than ThxVoice (one oscillator vs. ThxVoice's main
+    // oscillator plus its amortized LFO), so this can afford more voices than ThxDeepNote's
+    // hardware-measured 7 -- but this count itself hasn't been DWT-profiled on real hardware
+    // yet (see docs/progress.md / ThxDeepNote::voiceCount for how that measurement is done).
+    // Check maxProcessCycles()/clipCount() over SWO (see applications/wind_chimes/app.cpp's
+    // printPotValues()) after flashing and lower this if the budget percentage or clip count
+    // climbs.
+    static constexpr std::size_t voiceCount{10U};
 
     void init(float sampleRate)
     {
@@ -114,7 +121,16 @@ private:
     static constexpr float minCutoffHz{150.0F};
     static constexpr float maxCutoffHz{5'000.0F};
     static constexpr std::array<std::uint32_t, voiceCount> seedTable{
-        0x9E3779B9U, 0x85EBCA6BU, 0xC2B2AE35U, 0x27D4EB2FU, 0x165667B1U, 0xD3A2646CU};
+        0x9E3779B9U,
+        0x85EBCA6BU,
+        0xC2B2AE35U,
+        0x27D4EB2FU,
+        0x165667B1U,
+        0xD3A2646CU,
+        0x6C62272EU,
+        0x9AE16A3BU,
+        0x1B873593U,
+        0xE6546B64U};
 
     std::array<WindChimeVoice, voiceCount> _voices{};
     std::size_t _activeVoiceCount{voiceCount};

@@ -33,7 +33,7 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Spread | `POT_7` | How many octaves above the scale root a strike can land on, 0 (root only) – 1 (up to 3 octaves up). |
   | Timbre | `POT_4` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). |
   | Resonance | `POT_8` | Filter resonance, 0 (clean) – 1 (near self-oscillation). |
-  | Voice count | `POT_6` | How many of the 6 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |
+  | Voice count | `POT_6` | How many of the 10 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |
 
 - **`pot_blink/`** — Minimal demo (`galerna::app::GalernaApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
