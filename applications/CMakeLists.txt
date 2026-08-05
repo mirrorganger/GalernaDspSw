@@ -1,7 +1,7 @@
 # Defines one independently-buildable, independently-flashable firmware executable for
 # the app living in applications/<name>/app.cpp. Every app shares the same CubeMX bring-up
 # (main.c et al, via galerna_configure_cubemx_target(), defined in
-# cmake/stm32cubemx/CMakeLists.txt), HAL drivers, and galerna platform/core/effects/
+# firmware_core/CMakeLists.txt), HAL drivers, and galerna platform/core/effects/
 # drivers/app libraries -- only applications/<name>/app.cpp (the hardware wiring + which
 # galerna::app/galerna::effects classes to run) differs between them.
 function(galerna_add_app name)

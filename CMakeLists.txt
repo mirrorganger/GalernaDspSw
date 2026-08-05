@@ -46,9 +46,11 @@ if(GALERNA_BUILD_TESTS)
 endif()
 
 if(GALERNA_BUILD_STM32)
-    # STM32CubeMX generated sources and libraries (stm32cubemx, STM32_Drivers) -- needed
-    # before add_subdirectory(galerna) since galerna/platform links against stm32cubemx.
-    add_subdirectory(cmake/stm32cubemx)
+    # CubeMX-generated bring-up (firmware_core) and vendor HAL/CMSIS (drivers) -- needed
+    # before add_subdirectory(galerna) since galerna/platform links against stm32cubemx
+    # (declared in drivers/CMakeLists.txt, which in turn needs firmware_core's include dir).
+    add_subdirectory(firmware_core)
+    add_subdirectory(drivers)
 endif()
 
 add_subdirectory(galerna)

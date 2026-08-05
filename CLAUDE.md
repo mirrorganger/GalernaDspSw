@@ -36,10 +36,11 @@ and build commands.
 
 ## Working in this repo
 
-- `firmware_core/` (renamed from CubeMX's `Core/` to avoid colliding with `galerna/core`),
-  `drivers/` (renamed from `Drivers/`), `cmake/stm32cubemx/`, `startup_stm32f405xx.s`,
-  `STM32F405XX_FLASH.ld` were originally scaffolded by STM32CubeMX but are no longer
-  regenerated — the board's pinout is finalized, and `Galerna.ioc` has been retired to
+- `firmware_core/` (renamed from CubeMX's `Core/` to avoid colliding with `galerna/core`,
+  own `CMakeLists.txt`), `drivers/` (renamed from `Drivers/`, own `CMakeLists.txt`),
+  `startup_stm32f405xx.s`, `STM32F405XX_FLASH.ld` were originally scaffolded by
+  STM32CubeMX but are no longer regenerated — the board's pinout is finalized, and
+  `Galerna.ioc` has been retired to
   `docs/cubemx/` as a frozen reference snapshot (see `docs/cubemx/README.md`). These files
   are now hand-maintained firmware source like any other file in the repo: edit them
   directly when needed (e.g. add a peripheral by mirroring an existing `MX_*_Init` function
