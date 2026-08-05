@@ -8,14 +8,10 @@ This repository keeps the STM32CubeMX-generated firmware project intact and adds
 
 ## Important directories
 
-- `Core/` — Application/init code, originally scaffolded by STM32CubeMX, now hand-maintained.
-- `Drivers/` — STM32 HAL/CMSIS files.
-- `cmake/stm32cubemx/` — CMake integration, originally scaffolded by STM32CubeMX, now hand-maintained.
-- `startup_stm32f405xx.s` — STM32 startup file.
-- `STM32F405XX_FLASH.ld` — STM32 linker script.
-- `Application/` — C/C++ bridge called from CubeMX `main.c`.
-- `Galerna/` — Galerna C++ app, drivers, effects, concepts and STM32 platform adapters.
-- `Tests/` — host-side Catch2 tests.
+- `firmware_core/` — MCU bring-up/init code, IRQ table, startup file (`startup_stm32f405xx.s`) and linker script (`STM32F405XX_FLASH.ld`), originally scaffolded by STM32CubeMX, now hand-maintained, with its own `CMakeLists.txt`.
+- `drivers/` — STM32 HAL/CMSIS files, with its own `CMakeLists.txt`.
+- `galerna/` — Galerna C++ libraries (`app`, `core`, `drivers`, `effects`, `hal`, `platform`), each with its own `CMakeLists.txt` and `include/`/`src`(`platform` only)/`tests` layout.
+- `applications/` — one independently-buildable, independently-flashable firmware app per subdirectory (e.g. `thx_deep_note/`, `pot_blink/`), plus `applications/common/` for the C/C++ bridge called from CubeMX `main.c`, shared by every app.
 - `.devcontainer/`, `Dockerfile`, `compose.yaml` — reproducible VSCode/Docker development environment.
 
 ## Build firmware

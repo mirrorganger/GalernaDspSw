@@ -18,30 +18,30 @@
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash ThxDeepNote (Debug)",
+      "label": "Galerna: Flash thx_deep_note (Debug)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/ThxDeepNote.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/applications/thx_deep_note.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Debug Build",
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash ThxDeepNote (Release)",
+      "label": "Galerna: Flash thx_deep_note (Release)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/ThxDeepNote.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/thx_deep_note.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Release Build",
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash PotBlink (Debug)",
+      "label": "Galerna: Flash pot_blink (Debug)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/PotBlink.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/applications/pot_blink.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Debug Build",
       "problemMatcher": []
     },
     {
-      "label": "Galerna: Flash PotBlink (Release)",
+      "label": "Galerna: Flash pot_blink (Release)",
       "type": "shell",
-      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/PotBlink.elf verify reset exit\"",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/pot_blink.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Release Build",
       "problemMatcher": []
     }

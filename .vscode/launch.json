@@ -2,13 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Galerna: Debug ThxDeepNote (STM32 + SWO)",
+      "name": "Galerna: Debug thx_deep_note (STM32 + SWO)",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "openocd",
       "showDevDebugOutput": "raw",
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/ThxDeepNote.elf",
+      "executable": "${workspaceFolder}/build/Debug/applications/thx_deep_note.elf",
       "device": "STM32F405RG",
       "interface": "swd",
       "configFiles": [
@@ -32,13 +32,13 @@
       }
     },
     {
-      "name": "Galerna: Debug PotBlink (STM32 + SWO)",
+      "name": "Galerna: Debug pot_blink (STM32 + SWO)",
       "type": "cortex-debug",
       "request": "launch",
       "servertype": "openocd",
       "showDevDebugOutput": "raw",
       "cwd": "${workspaceFolder}",
-      "executable": "${workspaceFolder}/build/Debug/PotBlink.elf",
+      "executable": "${workspaceFolder}/build/Debug/applications/pot_blink.elf",
       "device": "STM32F405RG",
       "interface": "swd",
       "configFiles": [
