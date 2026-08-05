@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <functional>
 
-namespace galerna::app
+namespace galerna::core
 {
 
 // Displays `value` in binary across `leds` (leds[0] is the least significant bit). Values that
@@ -20,4 +20,4 @@ void displayBinary(std::array<std::reference_wrapper<TGpio>, LedCount>& leds, un
     }
 }
 
-} // namespace galerna::app
+} // namespace galerna::core

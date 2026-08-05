@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-namespace galerna::core
+namespace galerna::effects
 {
 
 // One voice of a Deep Note-style synth: a sawtooth oscillator whose frequency glides between a
@@ -67,12 +67,12 @@ public:
 private:
     static constexpr float lfoMaxAmplitude{0.005F};
 
-    WavetableOscillator<64U> _osc;
-    WavetableOscillator<64U> _lfo;
+    core::WavetableOscillator<64U> _osc;
+    core::WavetableOscillator<64U> _lfo;
     float _targetFrequencyHz{highestFrequencyHz};
     float _oscFrequencyHz{lowestFrequencyHz};
     float _lfoValue{0.0F};
     std::size_t _lfoSampleCounter{0U};
 };
 
-} // namespace galerna::core
+} // namespace galerna::effects

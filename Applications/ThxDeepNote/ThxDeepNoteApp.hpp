@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Galerna/App/BinaryLedDisplay.hpp"
+#include "Galerna/Core/BinaryLedDisplay.hpp"
 #include "Galerna/Drivers/PotMux4051.hpp"
 #include "Galerna/Hal/AdcConcept.hpp"
 #include "Galerna/Hal/GpioConcept.hpp"
@@ -77,7 +77,7 @@ public:
             voiceCountNormalized * static_cast<float>(TEffect::voiceCount) + 0.5F);
         _effect.setActiveVoiceCount(activeVoiceCount);
 
-        displayBinary(_statusLeds, static_cast<unsigned>(activeVoiceCount));
+        core::displayBinary(_statusLeds, static_cast<unsigned>(activeVoiceCount));
         return activeVoiceCount;
     }
 

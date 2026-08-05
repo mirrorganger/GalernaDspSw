@@ -144,18 +144,18 @@ if(GALERNA_BUILD_TESTS)
     enable_testing()
 
     add_executable(galerna_tests
-        Tests/App/test_binary_led_display.cpp
         Tests/App/test_galerna_app.cpp
+        Tests/Applications/ThxDeepNote/test_thx_deep_note_app.cpp
+        Tests/Core/test_binary_led_display.cpp
         Tests/Core/test_duplex_audio_block_processor.cpp
         Tests/Core/test_processor_chain.cpp
         Tests/Core/test_state_variable_filter.cpp
         Tests/Core/test_test_tone.cpp
-        Tests/Core/test_thx_voice.cpp
         Tests/Core/test_wavetable_oscillator.cpp
         Tests/Drivers/test_es8388_codec.cpp
         Tests/Drivers/test_pot_mux_4051.cpp
         Tests/Effects/test_thx_deep_note.cpp
-        Tests/App/test_thx_deep_note_app.cpp
+        Tests/Effects/test_thx_voice.cpp
     )
 
     target_link_libraries(galerna_tests PRIVATE

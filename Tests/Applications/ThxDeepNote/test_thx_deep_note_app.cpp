@@ -1,4 +1,4 @@
-#include "Galerna/App/ThxDeepNoteApp.hpp"
+#include "Applications/ThxDeepNote/ThxDeepNoteApp.hpp"
 #include "Galerna/Drivers/PotMux4051.hpp"
 #include "Tests/Fakes/FakeAdc.hpp"
 #include "Tests/Fakes/FakeGpio.hpp"

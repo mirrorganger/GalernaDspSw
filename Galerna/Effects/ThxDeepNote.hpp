@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Galerna/Core/StateVariableFilter.hpp"
-#include "Galerna/Core/ThxVoice.hpp"
+#include "Galerna/Effects/ThxVoice.hpp"
 
 #include <algorithm>
 #include <array>
@@ -29,12 +29,12 @@ public:
 
     void init(float sampleRate)
     {
-        float targetFrequencyHz = core::ThxVoice::lowestFrequencyHz;
+        float targetFrequencyHz = ThxVoice::lowestFrequencyHz;
         for (std::size_t voice = 0U; voice < voiceCount; ++voice)
         {
             _voices[voice].init(sampleRate, targetFrequencyHz, lfoRateTableHz[voice]);
             targetFrequencyHz *= 1.5F;
-            if (targetFrequencyHz > core::ThxVoice::highestFrequencyHz)
+            if (targetFrequencyHz > ThxVoice::highestFrequencyHz)
             {
                 targetFrequencyHz *= 0.5F;
             }
@@ -135,7 +135,7 @@ private:
     static constexpr std::array<float, voiceCount> lfoRateTableHz{
         5.0F, 9.17F, 13.33F, 17.5F, 21.67F, 25.83F, 30.0F};
 
-    std::array<core::ThxVoice, voiceCount> _voices{};
+    std::array<ThxVoice, voiceCount> _voices{};
     std::size_t _activeVoiceCount{voiceCount};
     float _pitch{0.0F};
     float _pitchShiftHz{0.0F};

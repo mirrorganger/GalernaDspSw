@@ -1,6 +1,6 @@
 #include "app.h"
 
-#include "Galerna/App/ThxDeepNoteApp.hpp"
+#include "Applications/ThxDeepNote/ThxDeepNoteApp.hpp"
 #include "Galerna/Core/DuplexAudioBlockProcessor.hpp"
 #include "Galerna/Core/ProcessorChain.hpp"
 #include "Galerna/Drivers/Es8388Codec.hpp"

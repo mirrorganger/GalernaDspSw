@@ -1,4 +1,4 @@
-#include "Galerna/Core/ThxVoice.hpp"
+#include "Galerna/Effects/ThxVoice.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -6,25 +6,25 @@
 
 TEST_CASE("ThxVoice frequency glide stays within the requested bounds")
 {
-    galerna::core::ThxVoice voice;
+    galerna::effects::ThxVoice voice;
     voice.init(48'000.0F, 500.0F, 10.0F);
 
     for (int step = 0; step <= 10; ++step)
     {
         const float pitch = static_cast<float>(step) / 10.0F;
         voice.update(pitch, 0.0F);
-        REQUIRE(voice.frequencyHz() >= galerna::core::ThxVoice::lowestFrequencyHz);
+        REQUIRE(voice.frequencyHz() >= galerna::effects::ThxVoice::lowestFrequencyHz);
         REQUIRE(voice.frequencyHz() <= 500.0F);
     }
 }
 
 TEST_CASE("ThxVoice glide bounds shift by pitchShiftHz")
 {
-    galerna::core::ThxVoice voice;
+    galerna::effects::ThxVoice voice;
     voice.init(48'000.0F, 500.0F, 10.0F);
 
     voice.update(0.0F, 200.0F);
-    REQUIRE(voice.frequencyHz() == galerna::core::ThxVoice::lowestFrequencyHz + 200.0F);
+    REQUIRE(voice.frequencyHz() == galerna::effects::ThxVoice::lowestFrequencyHz + 200.0F);
 
     voice.update(1.0F, 200.0F);
     REQUIRE(voice.frequencyHz() == 500.0F + 200.0F);
@@ -32,7 +32,7 @@ TEST_CASE("ThxVoice glide bounds shift by pitchShiftHz")
 
 TEST_CASE("ThxVoice LFO amplitude grows with pitch and is zero at pitch 0")
 {
-    galerna::core::ThxVoice voice;
+    galerna::effects::ThxVoice voice;
     voice.init(48'000.0F, 500.0F, 10.0F);
 
     voice.update(0.0F, 0.0F);
@@ -51,7 +51,7 @@ TEST_CASE("ThxVoice LFO amplitude grows with pitch and is zero at pitch 0")
 
 TEST_CASE("ThxVoice process output stays finite across a pitch sweep")
 {
-    galerna::core::ThxVoice voice;
+    galerna::effects::ThxVoice voice;
     voice.init(48'000.0F, 500.0F, 10.0F);
 
     for (int step = 0; step <= 10; ++step)

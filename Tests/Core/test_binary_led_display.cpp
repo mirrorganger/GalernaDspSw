@@ -1,4 +1,4 @@
-#include "Galerna/App/BinaryLedDisplay.hpp"
+#include "Galerna/Core/BinaryLedDisplay.hpp"
 #include "Tests/Fakes/FakeGpio.hpp"
 
 #include <array>
@@ -12,7 +12,7 @@ TEST_CASE("displayBinary lights LEDs matching each bit, LSB first")
     FakeGpio led2;
     std::array<std::reference_wrapper<FakeGpio>, 3> leds{std::ref(led0), std::ref(led1), std::ref(led2)};
 
-    galerna::app::displayBinary(leds, 5U); // 0b101
+    galerna::core::displayBinary(leds, 5U); // 0b101
 
     REQUIRE(led0.get() == true);
     REQUIRE(led1.get() == false);
@@ -29,7 +29,7 @@ TEST_CASE("displayBinary turns all LEDs off for zero")
     led2.set(true);
     std::array<std::reference_wrapper<FakeGpio>, 3> leds{std::ref(led0), std::ref(led1), std::ref(led2)};
 
-    galerna::app::displayBinary(leds, 0U);
+    galerna::core::displayBinary(leds, 0U);
 
     REQUIRE(led0.get() == false);
     REQUIRE(led1.get() == false);
@@ -42,7 +42,7 @@ TEST_CASE("displayBinary truncates values that don't fit in the LED count")
     FakeGpio led1;
     std::array<std::reference_wrapper<FakeGpio>, 2> leds{std::ref(led0), std::ref(led1)};
 
-    galerna::app::displayBinary(leds, 6U); // 0b110 -> only the low 2 bits (0b10) are shown
+    galerna::core::displayBinary(leds, 6U); // 0b110 -> only the low 2 bits (0b10) are shown
 
     REQUIRE(led0.get() == false);
     REQUIRE(led1.get() == true);
