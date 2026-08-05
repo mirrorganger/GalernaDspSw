@@ -26,7 +26,7 @@ function(galerna_configure_cubemx_target target)
         ${CMAKE_SOURCE_DIR}/firmware_core/src/stm32f4xx_hal_msp.c
         ${CMAKE_SOURCE_DIR}/firmware_core/src/sysmem.c
         ${CMAKE_SOURCE_DIR}/firmware_core/src/syscalls.c
-        ${CMAKE_SOURCE_DIR}/startup_stm32f405xx.s
+        ${CMAKE_SOURCE_DIR}/firmware_core/startup_stm32f405xx.s
     )
     target_link_libraries(${target} PRIVATE
         firmware_core
