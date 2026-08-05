@@ -98,7 +98,14 @@ private:
     // expressed as a per-sample multiplier so ringDurationS is independent of sample rate.
     static constexpr float ringDurationS{1.4F};
     static constexpr float silenceThreshold{0.001F};
-    static constexpr float minIntervalS{0.15F};
+    // minIntervalS only bounds the *wait* before a strike, not the strike-to-strike rate: a
+    // voice can't re-strike until its current ring has decayed below silenceThreshold (see
+    // process()), so at maximum density a single voice's real cycle time is close to
+    // ringDurationS + a small jittered fraction of minIntervalS, not minIntervalS itself. Lower
+    // ringDurationS too if a faster max density should be audible on a single voice rather
+    // than just tightening how closely staggered voices in the bank can land on top of
+    // each other.
+    static constexpr float minIntervalS{0.05F};
     static constexpr float maxIntervalS{4.0F};
     // Highest octave a strike can be shifted up by, reached at spread == 1.
     static constexpr float maxOctaveSpread{2.0F};
