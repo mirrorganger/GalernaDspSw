@@ -25,12 +25,12 @@ flowchart LR
     subgraph MCU["STM32F405"]
         direction TB
 
-        subgraph I2S["I2S2 / I2S2ext (Core/Src/main.c: MX_I2S2_Init)"]
+        subgraph I2S["I2S2 / I2S2ext (firmware_core/src/main.c: MX_I2S2_Init)"]
             I2S2["I2S2 (=SPI2 in I2S mode)\n16-bit, master"]
             I2S2ext["I2S2ext\nRX-only shadow peripheral"]
         end
 
-        subgraph DMA["DMA1 (Core/Src/stm32f4xx_hal_msp.c: HAL_I2S_MspInit)"]
+        subgraph DMA["DMA1 (firmware_core/src/stm32f4xx_hal_msp.c: HAL_I2S_MspInit)"]
             S4["Stream4 / Channel0\nhdma_spi2_tx\nmemory to peripheral, circular"]
             S3["Stream3 / Channel3\nhdma_i2s2_ext_rx\nperipheral to memory, circular"]
         end
@@ -75,7 +75,7 @@ to understanding what you can and can't rename or reconfigure.
    or Stream4 (TX, line-out) when its half/full transfer completes.
 
 2. **CPU vectors to the ISR — by name.** `DMA1_Stream3_IRQHandler` /
-   `DMA1_Stream4_IRQHandler` (`Core/Src/stm32f4xx_it.c`) are fixed names
+   `DMA1_Stream4_IRQHandler` (`firmware_core/src/stm32f4xx_it.c`) are fixed names
    the startup file's vector table (`startup_stm32f405xx.s`) points at by
    symbol. Rename these and the vector table entry goes back to its default
    (do-nothing) handler.
@@ -110,7 +110,7 @@ to understanding what you can and can't rename or reconfigure.
    handle, then calls the public callback — by name.**
    `I2SEx_TxRxDMAHalfCplt`/`I2SEx_TxRxDMACplt` read `hdma->Parent` (`=
    &hi2s2`, set by the `__HAL_LINKDMA(hi2s, hdmarx, hdma_i2s2_ext_rx)` macro
-   in *our* `HAL_I2S_MspInit()`, `Core/Src/stm32f4xx_hal_msp.c`) and call
+   in *our* `HAL_I2S_MspInit()`, `firmware_core/src/stm32f4xx_hal_msp.c`) and call
    `HAL_I2SEx_TxRxHalfCpltCallback(hi2s)` / `HAL_I2SEx_TxRxCpltCallback(hi2s)`
    directly by symbol name, not through a pointer.
 
@@ -118,8 +118,8 @@ to understanding what you can and can't rename or reconfigure.
    `HAL_I2SEx_TxRxHalfCpltCallback`/`HAL_I2SEx_TxRxCpltCallback`/
    `HAL_I2S_ErrorCallback` `__weak` (a do-nothing default). We define
    *strong* functions with the exact same names in
-   `Galerna/Platform/Stm32F405/Stm32I2sDuplexAudioCallbacks.cpp` (compiled
-   directly into each app executable, not into the `galerna_platform_stm32`
+   `galerna/platform/src/stm32f405/Stm32I2sDuplexAudioCallbacks.cpp` (compiled
+   directly into each app executable, not into the `galerna_platform`
    static archive, so the linker is forced to pull the override in). These
    names are **not renameable** -- a different name wouldn't override
    anything, and HAL would silently keep calling its own empty default.
@@ -142,7 +142,7 @@ to understanding what you can and can't rename or reconfigure.
     whichever ping-pong half of the raw int16 buffers just became safe to
     touch and calls `_processor.process(rxHalfSpan, txHalfSpan)` --
     `_processor` is whatever the app wired up as the second constructor
-    argument (`Applications/ThxDeepNote/app.cpp`: `audioProcessor`), an
+    argument (`applications/thx_deep_note/app.cpp`: `audioProcessor`), an
     ordinary (compile-time-resolved, template) call from here on.
 
 11. **`DuplexAudioBlockProcessor::process()` &rarr; `ProcessorChain` &rarr; effect.**
@@ -150,7 +150,7 @@ to understanding what you can and can't rename or reconfigure.
     `ProcessorChain::processBlock` (forwards to each `Processors...`, here a
     single `ThxDeepNote`), then converted back to int16 with clamping
     (tracked via `clipCount()`). This is the only stage where swapping the
-    effect type in `Applications/<Name>/app.cpp` changes what audio comes
+    effect type in `applications/<name>/app.cpp` changes what audio comes
     out -- every hop before it is generic.
 
 ```mermaid
@@ -192,10 +192,10 @@ sequenceDiagram
 
 | Concern | File |
 | --- | --- |
-| DMA stream/channel/priority config | `Core/Src/stm32f4xx_hal_msp.c` (`HAL_I2S_MspInit`), `Core/Src/main.c` (`MX_DMA_Init`) |
-| DMA IRQ vector wiring | `Core/Src/stm32f4xx_it.c` |
-| HAL callback overrides (ISR &rarr; C++ bridge) | `Galerna/Platform/Stm32F405/Stm32I2sDuplexAudioCallbacks.cpp` |
-| Ping-pong buffers, callback registration, cycle budget measurement | `Galerna/Platform/Stm32F405/Stm32I2sDuplexAudio.hpp` |
-| int16 &lt;-&gt; float conversion, clipping | `Galerna/Core/DuplexAudioBlockProcessor.hpp` |
-| Effect chaining | `Galerna/Core/ProcessorChain.hpp` |
-| Concrete effect (per app) | `Galerna/Effects/*.hpp`, wired in `Applications/<Name>/app.cpp` |
+| DMA stream/channel/priority config | `firmware_core/src/stm32f4xx_hal_msp.c` (`HAL_I2S_MspInit`), `firmware_core/src/main.c` (`MX_DMA_Init`) |
+| DMA IRQ vector wiring | `firmware_core/src/stm32f4xx_it.c` |
+| HAL callback overrides (ISR &rarr; C++ bridge) | `galerna/platform/src/stm32f405/Stm32I2sDuplexAudioCallbacks.cpp` |
+| Ping-pong buffers, callback registration, cycle budget measurement | `galerna/platform/include/galerna/platform/stm32f405/Stm32I2sDuplexAudio.hpp` |
+| int16 &lt;-&gt; float conversion, clipping | `galerna/core/include/galerna/core/DuplexAudioBlockProcessor.hpp` |
+| Effect chaining | `galerna/core/include/galerna/core/ProcessorChain.hpp` |
+| Concrete effect (per app) | `galerna/effects/include/galerna/effects/*.hpp`, wired in `applications/<name>/app.cpp` |
