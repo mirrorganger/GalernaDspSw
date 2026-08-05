@@ -22,12 +22,11 @@ class WindChimes
 public:
     // WindChimeVoice is cheaper per-sample than ThxVoice (one oscillator vs. ThxVoice's main
     // oscillator plus its amortized LFO), so this can afford more voices than ThxDeepNote's
-    // hardware-measured 7 -- but this count itself hasn't been DWT-profiled on real hardware
-    // yet (see docs/progress.md / ThxDeepNote::voiceCount for how that measurement is done).
-    // Check maxProcessCycles()/clipCount() over SWO (see applications/wind_chimes/app.cpp's
-    // printPotValues()) after flashing and lower this if the budget percentage or clip count
-    // climbs.
-    static constexpr std::size_t voiceCount{10U};
+    // hardware-measured 7 -- 10 was tried first (a cost-based estimate, not DWT-profiled) and
+    // confirmed on real hardware not to work, so this settles for ThxDeepNote's own proven-safe
+    // ceiling instead. Check maxProcessCycles()/clipCount() over SWO (see
+    // applications/wind_chimes/app.cpp's printPotValues()) before raising this again.
+    static constexpr std::size_t voiceCount{8U};
 
     void init(float sampleRate)
     {
@@ -128,9 +127,7 @@ private:
         0x165667B1U,
         0xD3A2646CU,
         0x6C62272EU,
-        0x9AE16A3BU,
-        0x1B873593U,
-        0xE6546B64U};
+        0x9AE16A3BU};
 
     std::array<WindChimeVoice, voiceCount> _voices{};
     std::size_t _activeVoiceCount{voiceCount};
