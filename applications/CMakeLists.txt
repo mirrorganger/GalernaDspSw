@@ -41,3 +41,4 @@ endfunction()
 
 galerna_add_app(thx_deep_note)
 galerna_add_app(pot_blink)
+galerna_add_app(wind_chimes)

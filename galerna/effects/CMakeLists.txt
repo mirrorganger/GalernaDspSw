@@ -13,5 +13,7 @@ if(GALERNA_BUILD_TESTS)
     target_sources(galerna_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestThxDeepNote.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestThxVoice.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestWindChimes.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestWindChimeVoice.cpp
     )
 endif()

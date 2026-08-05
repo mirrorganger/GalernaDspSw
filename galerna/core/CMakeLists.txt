@@ -17,5 +17,6 @@ if(GALERNA_BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestStateVariableFilter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestTestTone.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestWavetableOscillator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestXorshift32.cpp
     )
 endif()

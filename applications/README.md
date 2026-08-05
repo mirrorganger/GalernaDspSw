@@ -10,6 +10,13 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   (`Stm32I2sDuplexAudio`). Five potentiometers (via `PotMux4051`) control pitch, pitch shift,
   timbre, resonance, and active voice count; the status LEDs mirror the voice count in binary.
   Also brings up the ES8388 codec over I2C before starting the audio engine.
+- **`wind_chimes/`** — Audio demo: a generative ambient synth (`galerna::effects::WindChimes`,
+  driven by `WindChimesApp`) where a bank of independently-scheduled `WindChimeVoice` "strikers"
+  wait a randomized interval, then ring out a note from a pentatonic scale and decay, like a
+  physical chime struck by the wind — streamed to line-out over I2S DMA
+  (`Stm32I2sDuplexAudio`). Five potentiometers control strike density, pitch spread (octave
+  range), filter timbre/resonance, and active voice count; the status LEDs mirror the voice
+  count in binary. Also brings up the ES8388 codec over I2C before starting the audio engine.
 - **`pot_blink/`** — Minimal demo (`galerna::app::GalernaApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
   useful as a smoke test for GPIO/ADC/mux wiring independent of the codec/I2S path.
