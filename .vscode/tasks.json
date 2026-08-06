@@ -44,6 +44,34 @@
       "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/pot_blink.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Release Build",
       "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash wind_chimes (Debug)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/applications/wind_chimes.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Debug Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash wind_chimes (Release)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/wind_chimes.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Release Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash twin_pluck (Debug)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/applications/twin_pluck.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Debug Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash twin_pluck (Release)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/twin_pluck.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Release Build",
+      "problemMatcher": []
     }
   ]
 }

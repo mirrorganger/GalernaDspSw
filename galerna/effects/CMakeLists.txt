@@ -11,7 +11,16 @@ target_link_libraries(galerna_effects INTERFACE galerna::core)
 
 if(GALERNA_BUILD_TESTS)
     target_sources(galerna_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverb.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverbLine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedAllpass.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedDelayLine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestMultitapDelay.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestPluckVoice.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestThxDeepNote.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestThxVoice.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestTwinPluck.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestWindChimes.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestWindChimeVoice.cpp
     )
 endif()

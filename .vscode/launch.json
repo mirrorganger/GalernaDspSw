@@ -60,6 +60,36 @@
           }
         ]
       }
+    },
+    {
+      "name": "Galerna: Debug wind_chimes (STM32 + SWO)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "showDevDebugOutput": "raw",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/Debug/applications/wind_chimes.elf",
+      "device": "STM32F405RG",
+      "interface": "swd",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32f4x.cfg"
+      ],
+      "preLaunchTask": "Galerna: STM32 Debug Build",
+      "runToEntryPoint": "main",
+      "swoConfig": {
+        "enabled": true,
+        "cpuFrequency": 24000000,
+        "swoFrequency": 2000000,
+        "source": "probe",
+        "decoders": [
+          {
+            "type": "console",
+            "label": "ITM port 0",
+            "port": 0
+          }
+        ]
+      }
     }
   ]
 }
