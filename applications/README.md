@@ -42,6 +42,38 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Reverb mix | `POT_3` | Dry/wet blend of the CloudReverb tail, 0 (dry) – 1 (fully wet). |
   | Reverb size | `POT_2` | How long the reverb tail sustains (late-line feedback gain), 0 (short) – 1 (long, cloudy wash). |
 
+- **`twin_pluck/`** — Audio demo: a 4-voice gated oscillator instrument
+  (`galerna::effects::TwinPluck`, driven by `TwinPluckApp`). Voices 1/2 are pot-pitched and
+  gated by the two push buttons: each gates its own oscillator voice on for as long as it's
+  held, then releases with an exponential decay once let go (`galerna::effects::PluckVoice`),
+  pitch quantized to a pentatonic scale so the pitch pots always land on a musically consonant
+  note. Voices 3/4 are fixed-pitch drones (the scale root, and a perfect fifth above it) gated
+  by the two on/off switches instead -- a switch's own position is its own visual "is this
+  sounding" indicator, so a switch's steady on/off state gates its drone the same way a
+  button's press/release gates its voice, just latched instead of momentary. All four voices
+  are summed and then chained into `galerna::effects::CloudReverb` (see
+  `applications/wind_chimes/`'s entry above and `docs/architecture.md`'s Reverb section for the
+  reverb design) before streaming to line-out over I2S DMA (`Stm32I2sDuplexAudio`). Seven
+  potentiometers control the two pot-pitched voices plus shared release decay, filter
+  timbre/resonance, and reverb mix/size; the two buttons hold voice 1/2 and their status LEDs
+  mirror each voice's ringing state (LED2 unused); the two switches toggle the drone voices
+  on/off (no LED, the switch position already shows it). Also brings up the ES8388 codec over
+  I2C before starting the audio engine.
+
+  | Control | Physical control | Effect |
+  |---|---|---|
+  | Pitch 1 | `POT_3` | Voice 1's pitch, quantized to a 3-octave pentatonic scale. |
+  | Pitch 2 | `POT_5` | Voice 2's pitch, quantized to a 3-octave pentatonic scale. |
+  | Decay | `POT_1` | How long a voice rings out after being released, exponential 0.2 s (short) – 3 s (long, sustained tail). Applies to all four voices. |
+  | Timbre | `POT_7` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). Applies to all four voices. |
+  | Resonance | `POT_2` | Filter resonance, 0 (clean) – 1 (near self-oscillation). Applies to all four voices. |
+  | Reverb mix | `POT_4` | Dry/wet blend of the CloudReverb tail, 0 (dry) – 1 (fully wet). |
+  | Reverb size | `POT_6` | How long the reverb tail sustains (late-line feedback gain), 0 (short) – 1 (long, cloudy wash). |
+  | Hold voice 1 | `BTN1` | Sustains voice 1 at its currently-set pitch for as long as held; releases on let-go. |
+  | Hold voice 2 | `BTN2` | Sustains voice 2 at its currently-set pitch for as long as held; releases on let-go. |
+  | Drone (root) | `SW1` | Toggles a fixed-pitch drone at the scale root on/off. |
+  | Drone (fifth) | `SW2` | Toggles a fixed-pitch drone a perfect fifth above the root on/off. |
+
 - **`pot_blink/`** — Minimal demo (`galerna::app::GalernaApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
   useful as a smoke test for GPIO/ADC/mux wiring independent of the codec/I2S path.
