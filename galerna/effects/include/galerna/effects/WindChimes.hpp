@@ -23,10 +23,21 @@ public:
     // WindChimeVoice is cheaper per-sample than ThxVoice (one oscillator vs. ThxVoice's main
     // oscillator plus its amortized LFO), so this can afford more voices than ThxDeepNote's
     // hardware-measured 7 -- 10 was tried first (a cost-based estimate, not DWT-profiled) and
-    // confirmed on real hardware not to work, so this settles for ThxDeepNote's own proven-safe
-    // ceiling instead. Check maxProcessCycles()/clipCount() over SWO (see
-    // applications/wind_chimes/app.cpp's printPotValues()) before raising this again.
-    static constexpr std::size_t voiceCount{8U};
+    // confirmed on real hardware not to work, so this settled at 8 (ThxDeepNote's own
+    // proven-safe ceiling) for a while. Lowered further, in two steps, once CloudReverb (see
+    // docs/architecture.md's Reverb section) was chained after it: real hardware DWT profiling
+    // showed the combined WindChimes+CloudReverb cost massively over budget (maxProcessCycles
+    // ~5.8x the per-block budget even after force-inlining the hot path). 8->5 plus cutting
+    // CloudReverb down to a single mono line got to ~1.2x over; 5->4 (plus trimming CloudReverb's
+    // own diffuser/multitap further) got to ~1.1x; 4->3 finally landed under budget at 97.9% --
+    // technically safe but matching a razor's edge this codebase has already judged too risky
+    // (see ThxDeepNote::voiceCount's own 98.8%-was-too-risky comment), so CloudReverb's last
+    // diffuser stage was also cut (see CloudReverb.hpp) rather than pushing voiceCount down
+    // further and losing more chime density. Final verified state at voiceCount 3: 39,165/47,190
+    // cycles (83.0% of budget), clipCount 764/~1.94M samples (0.04%), errorCount 0, 30s soak.
+    // Check maxProcessCycles()/clipCount() over SWO (see applications/wind_chimes/app.cpp's
+    // printPotValues()) before raising this again.
+    static constexpr std::size_t voiceCount{3U};
 
     void init(float sampleRate)
     {
@@ -131,14 +142,7 @@ private:
     static constexpr float minDecayS{0.2F};
     static constexpr float maxDecayS{3.0F};
     static constexpr std::array<std::uint32_t, voiceCount> seedTable{
-        0x9E3779B9U,
-        0x85EBCA6BU,
-        0xC2B2AE35U,
-        0x27D4EB2FU,
-        0x165667B1U,
-        0xD3A2646CU,
-        0x6C62272EU,
-        0x9AE16A3BU};
+        0x9E3779B9U, 0x85EBCA6BU, 0xC2B2AE35U};
 
     std::array<WindChimeVoice, voiceCount> _voices{};
     std::size_t _activeVoiceCount{voiceCount};

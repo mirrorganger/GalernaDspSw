@@ -5,6 +5,7 @@
 #include "galerna/core/ProcessorChain.hpp"
 #include "galerna/drivers/Es8388Codec.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
+#include "galerna/effects/CloudReverb.hpp"
 #include "galerna/effects/WindChimes.hpp"
 #include "galerna/platform/stm32f405/Stm32Adc.hpp"
 #include "galerna/platform/stm32f405/Stm32Gpio.hpp"
@@ -66,28 +67,41 @@ constexpr std::size_t audioFramesPerHalf{64U}; // 64 stereo frames = 2 ms per ha
 // nominal 32 kHz the ES8388 register script assumes (see docs/progress.md).
 constexpr float audioSampleRateHz{50'000'000.0F / 1536.0F};
 galerna::effects::WindChimes audioWindChimes;
-galerna::core::ProcessorChain<galerna::effects::WindChimes> audioChain{audioWindChimes};
-galerna::core::DuplexAudioBlockProcessor<audioFramesPerHalf, galerna::effects::WindChimes> audioProcessor{
-    audioChain};
-galerna::platform::stm32f405::Stm32I2sDuplexAudio<
-    audioFramesPerHalf,
-    galerna::core::DuplexAudioBlockProcessor<audioFramesPerHalf, galerna::effects::WindChimes>>
-    audioEngine{hi2s2, audioProcessor};
+// CloudReverb ("CloudSeed-lite", see galerna/effects/CloudReverb.hpp and docs/architecture.md's
+// Reverb section) chained after the synth -- ProcessorChain runs each processor over the buffer
+// in order, so this reverberates WindChimes' output in place rather than generating its own
+// signal.
+galerna::effects::CloudReverb audioCloudReverb;
+galerna::core::ProcessorChain<galerna::effects::WindChimes, galerna::effects::CloudReverb> audioChain{
+    audioWindChimes, audioCloudReverb};
+galerna::core::DuplexAudioBlockProcessor<audioFramesPerHalf, galerna::effects::WindChimes, galerna::effects::CloudReverb>
+    audioProcessor{audioChain};
+galerna::platform::stm32f405::Stm32I2sDuplexAudio<audioFramesPerHalf, decltype(audioProcessor)> audioEngine{
+    hi2s2, audioProcessor};
 
-// WindChimes synth controls, one PotMux4051 channel each (channels not already claimed by the
-// (currently unused in this app) LED-blink demo -- see applications/pot_blink/app.cpp).
+// WindChimes+CloudReverb controls, one PotMux4051 channel each (all 8 channels are now spoken
+// for -- channels 0/4 (POT_3/POT_2) used to be free, now drive the reverb's mix/size).
 galerna::app::WindChimesApp<
     galerna::platform::stm32f405::Stm32Gpio,
     galerna::platform::stm32f405::Stm32Adc,
     galerna::platform::stm32f405::Stm32Gpio,
     decltype(audioEngine),
-    galerna::effects::WindChimes>
+    galerna::effects::WindChimes,
+    galerna::effects::CloudReverb>
     windChimesApp{
         statusLeds,
         potMux,
-        {.density = 1U, .spread = 3U, .decay = 2U, .timbre = 5U, .resonance = 7U, .voiceCount = 6U},
+        {.density = 1U,
+         .spread = 3U,
+         .decay = 2U,
+         .timbre = 5U,
+         .resonance = 7U,
+         .voiceCount = 6U,
+         .reverbMix = 0U,
+         .reverbSize = 4U},
         audioEngine,
         audioWindChimes,
+        audioCloudReverb,
         audioSampleRateHz};
 
 void printPotValues()

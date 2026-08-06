@@ -13,15 +13,22 @@
 namespace galerna::app
 {
 
-// Drives the WindChimes synth demo at control rate: reads 6 PotMux4051 channels into the synth's
-// density/spread/decay/timbre/resonance/voiceCount controls and mirrors the resulting active
-// voice count on the status LEDs in binary (see displayBinary()). Same shape as ThxDeepNoteApp --
-// TAudioEngine/TEffect are duck-typed for the same reason (always the single concrete
-// Stm32I2sDuplexAudio<...>/WindChimes instances constructed once per app, not swapped for host
-// fakes). Codec bring-up stays a free function in applications/wind_chimes/app.cpp, same
+// Drives the WindChimes synth demo at control rate: reads 8 PotMux4051 channels into the synth's
+// density/spread/decay/timbre/resonance/voiceCount controls plus the CloudReverb chained after it
+// (mix/size -- see galerna/effects/CloudReverb.hpp), and mirrors the resulting active voice count
+// on the status LEDs in binary (see displayBinary()). Same shape as ThxDeepNoteApp --
+// TAudioEngine/TEffect/TReverb are duck-typed for the same reason (always the single concrete
+// Stm32I2sDuplexAudio<...>/WindChimes/CloudReverb instances constructed once per app, not swapped
+// for host fakes). Codec bring-up stays a free function in applications/wind_chimes/app.cpp, same
 // reasoning as ThxDeepNoteApp -- init() assumes the codec is already configured by the time it's
 // called.
-template <hal::Gpio TStatusLed, hal::Adc TAdc, hal::Gpio TMuxGpio, typename TAudioEngine, typename TEffect>
+template <
+    hal::Gpio TStatusLed,
+    hal::Adc TAdc,
+    hal::Gpio TMuxGpio,
+    typename TAudioEngine,
+    typename TEffect,
+    typename TReverb>
 class WindChimesApp
 {
 public:
@@ -36,6 +43,8 @@ public:
         std::uint8_t timbre;
         std::uint8_t resonance;
         std::uint8_t voiceCount;
+        std::uint8_t reverbMix;
+        std::uint8_t reverbSize;
     };
 
     WindChimesApp(
@@ -44,25 +53,28 @@ public:
         PotMuxChannels potMuxChannels,
         TAudioEngine& audioEngine,
         TEffect& effect,
+        TReverb& reverb,
         float sampleRateHz)
         : _statusLeds{statusLeds}
         , _potMux{potMux}
         , _potMuxChannels{potMuxChannels}
         , _audioEngine{audioEngine}
         , _effect{effect}
+        , _reverb{reverb}
         , _sampleRateHz{sampleRateHz}
     {
     }
 
     // Assumes the codec is already configured (see applications/wind_chimes/app.cpp). Inits the
-    // synth for the real sample rate and starts the DMA-driven audio engine.
+    // synth and reverb for the real sample rate and starts the DMA-driven audio engine.
     bool init()
     {
         _effect.init(_sampleRateHz);
+        _reverb.init(_sampleRateHz);
         return _audioEngine.start();
     }
 
-    // Reads the 6 WindChimes control pots, applies them to the effect, and mirrors the resulting
+    // Reads the 8 WindChimes+CloudReverb control pots, applies them, and mirrors the resulting
     // active voice count on the status LEDs. Returns the active voice count applied so the
     // caller can also use it for diagnostics.
     std::size_t tick()
@@ -72,6 +84,8 @@ public:
         _effect.setDecay(readNormalized(_potMuxChannels.decay));
         _effect.setTimbre(readNormalized(_potMuxChannels.timbre));
         _effect.setResonance(readNormalized(_potMuxChannels.resonance));
+        _reverb.setMix(readNormalized(_potMuxChannels.reverbMix));
+        _reverb.setSize(readNormalized(_potMuxChannels.reverbSize));
 
         const float voiceCountNormalized = readNormalized(_potMuxChannels.voiceCount);
         const auto activeVoiceCount = static_cast<std::size_t>(
@@ -93,6 +107,7 @@ private:
     PotMuxChannels _potMuxChannels;
     TAudioEngine& _audioEngine;
     TEffect& _effect;
+    TReverb& _reverb;
     float _sampleRateHz;
 };
 

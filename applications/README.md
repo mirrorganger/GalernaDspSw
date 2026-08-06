@@ -22,11 +22,14 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
 - **`wind_chimes/`** — Audio demo: a generative ambient synth (`galerna::effects::WindChimes`,
   driven by `WindChimesApp`) where a bank of independently-scheduled `WindChimeVoice` "strikers"
   wait a randomized interval, then ring out a note from a pentatonic scale and decay, like a
-  physical chime struck by the wind — streamed to line-out over I2S DMA
-  (`Stm32I2sDuplexAudio`). Six potentiometers control strike density, pitch spread (octave
-  range), decay time, filter timbre/resonance, and active voice count; the status LEDs mirror
-  the voice count in binary. Also brings up the ES8388 codec over I2C before starting the audio
-  engine.
+  physical chime struck by the wind, then chained into `galerna::effects::CloudReverb` (a mono,
+  heavily scaled-down homage to the CloudSeed/CloudReverb algorithmic reverb, cut down hard after
+  real hardware measurement — see `docs/architecture.md`'s Reverb section for the design, block
+  diagrams, and the full CPU-cost tuning history) before streaming to line-out over I2S DMA
+  (`Stm32I2sDuplexAudio`). Eight potentiometers control strike density, pitch spread (octave
+  range), decay time, filter timbre/resonance, active voice count, and reverb mix/size; the
+  status LEDs mirror the voice count in binary. Also brings up the ES8388 codec over I2C before
+  starting the audio engine.
 
   | Control | Physical pot | Effect |
   |---|---|---|
@@ -35,7 +38,9 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Decay | `POT_1` | How long a struck note rings out, exponential 0.2 s (short, plucky) – 3 s (long, sustained). |
   | Timbre | `POT_4` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). |
   | Resonance | `POT_8` | Filter resonance, 0 (clean) – 1 (near self-oscillation). |
-  | Voice count | `POT_6` | How many of the 8 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |
+  | Voice count | `POT_6` | How many of the 3 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |
+  | Reverb mix | `POT_3` | Dry/wet blend of the CloudReverb tail, 0 (dry) – 1 (fully wet). |
+  | Reverb size | `POT_2` | How long the reverb tail sustains (late-line feedback gain), 0 (short) – 1 (long, cloudy wash). |
 
 - **`pot_blink/`** — Minimal demo (`galerna::app::GalernaApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
