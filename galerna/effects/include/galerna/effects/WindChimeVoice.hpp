@@ -1,10 +1,10 @@
 #pragma once
 
+#include "galerna/core/PentatonicScale.hpp"
 #include "galerna/core/WavetableOscillator.hpp"
 #include "galerna/core/Xorshift32.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -25,13 +25,6 @@ public:
     // ThxVoice's range, low enough to stay clear of harshness at the top of the audible band.
     static constexpr float lowestFrequencyHz{220.0F};
     static constexpr float highestFrequencyHz{1'760.0F};
-
-    // Ratios of a pentatonic scale (root, major second, major third, perfect fifth, major
-    // sixth) relative to lowestFrequencyHz -- avoids semitone clashes between simultaneously
-    // ringing voices, keeping the texture consonant regardless of which notes land together.
-    static constexpr std::size_t scaleDegreeCount{5U};
-    static constexpr std::array<float, scaleDegreeCount> scaleRatios{
-        1.0F, 9.0F / 8.0F, 5.0F / 4.0F, 3.0F / 2.0F, 5.0F / 3.0F};
 
     // Deliberately leaves _samplesUntilNextStrike at 0 (state waiting) rather than calling
     // scheduleNextStrike() here: at construction time no update() has run yet, so there is no
@@ -115,12 +108,13 @@ private:
 
     void strike()
     {
-        const auto degree = static_cast<std::size_t>(_rng.nextFloat01() * static_cast<float>(scaleDegreeCount))
-            % scaleDegreeCount;
+        const auto degree = static_cast<std::size_t>(
+            _rng.nextFloat01() * static_cast<float>(core::PentatonicScale::degreeCount))
+            % core::PentatonicScale::degreeCount;
         const auto octave = static_cast<float>(
             static_cast<int>(_rng.nextFloat01() * (1.0F + _spread * maxOctaveSpread)));
         const float frequencyHz = std::clamp(
-            lowestFrequencyHz * scaleRatios[degree] * std::pow(2.0F, octave),
+            lowestFrequencyHz * core::PentatonicScale::ratios[degree] * std::pow(2.0F, octave),
             lowestFrequencyHz,
             highestFrequencyHz);
 

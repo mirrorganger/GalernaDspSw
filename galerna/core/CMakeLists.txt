@@ -13,6 +13,7 @@ if(GALERNA_BUILD_TESTS)
     target_sources(galerna_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestBinaryLedDisplay.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestDuplexAudioBlockProcessor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestPentatonicScale.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestProcessorChain.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestStateVariableFilter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestTestTone.cpp
