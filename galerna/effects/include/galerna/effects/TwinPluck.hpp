@@ -1,6 +1,7 @@
 #pragma once
 
 #include "galerna/core/PentatonicScale.hpp"
+#include "galerna/core/Range.hpp"
 #include "galerna/core/StateVariableFilter.hpp"
 #include "galerna/core/Xorshift32.hpp"
 #include "galerna/effects/PluckVoice.hpp"
@@ -129,7 +130,7 @@ public:
     void setDecay(float decay)
     {
         const float normalized = std::clamp(decay, 0.0F, 1.0F);
-        _ringDurationS = minDecayS * std::pow(maxDecayS / minDecayS, normalized);
+        _ringDurationS = decaySRange.exponential(normalized);
     }
 
     // timbre: 0..1, exponentially maps to the filter cutoff between minCutoffHz and maxCutoffHz
@@ -137,8 +138,7 @@ public:
     void setTimbre(float timbre)
     {
         const float normalized = std::clamp(timbre, 0.0F, 1.0F);
-        const float cutoffHz = minCutoffHz * std::pow(maxCutoffHz / minCutoffHz, normalized);
-        _filter.setCutoff(cutoffHz);
+        _filter.setCutoff(cutoffHzRange.exponential(normalized));
     }
 
     // resonance: 0..1, filter peak at the cutoff frequency. Output is compensated (halved at
@@ -188,10 +188,8 @@ private:
     // computed from an "active voice count" the way WindChimes::headroom's scale is, since
     // TwinPluck has no such notion.
     static constexpr float headroom{1.0F / static_cast<float>(voiceCount)};
-    static constexpr float minCutoffHz{150.0F};
-    static constexpr float maxCutoffHz{5'000.0F};
-    static constexpr float minDecayS{0.2F};
-    static constexpr float maxDecayS{3.0F};
+    static constexpr core::Range cutoffHzRange{150.0F, 5'000.0F};
+    static constexpr core::Range decaySRange{0.2F, 3.0F};
 
     // Semi-random pitch wander for the drone voices: periodically (every ~wanderRetargetS
     // seconds on average, jittered so root/fifth don't lock into the same rhythm) picks a new

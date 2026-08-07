@@ -1,5 +1,6 @@
 #pragma once
 
+#include "galerna/core/Range.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/hal/AdcConcept.hpp"
 #include "galerna/hal/GpioConcept.hpp"
@@ -21,8 +22,7 @@ public:
     static constexpr std::size_t buttonCount{2};
     static constexpr std::size_t switchCount{2};
     static constexpr std::uint16_t potMaxValue{4'095};
-    static constexpr float minBlinkFrequencyHz{0.5F};
-    static constexpr float maxBlinkFrequencyHz{8.0F};
+    static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
     GalernaApp(
         std::array<std::reference_wrapper<TStatusLed>, ledCount> statusLeds,
@@ -93,9 +93,8 @@ public:
 private:
     static std::uint32_t blinkHalfPeriodMs(std::uint16_t potValue)
     {
-        const auto frequencyHz = minBlinkFrequencyHz
-            + (maxBlinkFrequencyHz - minBlinkFrequencyHz)
-                  * (static_cast<float>(potValue) / static_cast<float>(potMaxValue));
+        const auto frequencyHz
+            = blinkFrequencyHzRange.linear(static_cast<float>(potValue) / static_cast<float>(potMaxValue));
         return static_cast<std::uint32_t>(500.0F / frequencyHz);
     }
 

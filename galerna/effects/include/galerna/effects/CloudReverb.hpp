@@ -1,5 +1,6 @@
 #pragma once
 
+#include "galerna/core/Range.hpp"
 #include "galerna/effects/CloudReverbLine.hpp"
 #include "galerna/effects/MultitapDelay.hpp"
 
@@ -67,7 +68,7 @@ public:
     void setSize(float size)
     {
         const float normalized = std::clamp(size, 0.0F, 1.0F);
-        _line.setFeedback(minFeedback + normalized * (maxFeedback - minFeedback));
+        _line.setFeedback(feedbackRange.linear(normalized));
     }
 
     // flatten: forces the entire per-sample call chain (MultitapDelay + the one CloudReverbLine)
@@ -108,8 +109,8 @@ private:
     static constexpr float earlyGain{0.35F};
     static constexpr float lateGain{0.5F};
 
-    static constexpr float minFeedback{0.55F};
-    static constexpr float maxFeedback{0.92F}; // kept in sync with CloudReverbLine::maxFeedback
+    // .max kept in sync with CloudReverbLine::maxFeedback.
+    static constexpr core::Range feedbackRange{0.55F, 0.92F};
 
     MultitapDelay<multitapBufferSize, multitapTapCount> _multitap;
     // 0 diffuser stages (down from CloudReverbLine's original 2, via 1 -- see this class's own

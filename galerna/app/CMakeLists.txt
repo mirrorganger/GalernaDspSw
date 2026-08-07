@@ -6,8 +6,10 @@ target_include_directories(galerna_app INTERFACE
 )
 target_compile_features(galerna_app INTERFACE cxx_std_23)
 
-# GalernaApp.hpp takes the pot mux (galerna::drivers) and is constrained on hal::Adc/hal::Gpio.
+# GalernaApp.hpp takes the pot mux (galerna::drivers), is constrained on hal::Adc/hal::Gpio, and
+# uses core::Range for its blink-frequency map.
 target_link_libraries(galerna_app INTERFACE
+    galerna::core
     galerna::drivers
     galerna::hal
 )

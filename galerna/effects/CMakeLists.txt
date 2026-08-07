@@ -11,8 +11,10 @@ target_link_libraries(galerna_effects INTERFACE galerna::core)
 
 if(GALERNA_BUILD_TESTS)
     target_sources(galerna_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestAmbientPad.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverbLine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestDriftVoice.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedAllpass.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedDelayLine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestMultitapDelay.cpp

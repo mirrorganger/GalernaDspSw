@@ -1,5 +1,6 @@
 #pragma once
 
+#include "galerna/core/Range.hpp"
 #include "galerna/core/StateVariableFilter.hpp"
 #include "galerna/effects/WindChimeVoice.hpp"
 
@@ -72,7 +73,7 @@ public:
     void setDecay(float decay)
     {
         const float normalized = std::clamp(decay, 0.0F, 1.0F);
-        _ringDurationS = minDecayS * std::pow(maxDecayS / minDecayS, normalized);
+        _ringDurationS = decaySRange.exponential(normalized);
     }
 
     // timbre: 0..1, exponentially maps to the filter cutoff between minCutoffHz and maxCutoffHz
@@ -80,8 +81,7 @@ public:
     void setTimbre(float timbre)
     {
         const float normalized = std::clamp(timbre, 0.0F, 1.0F);
-        const float cutoffHz = minCutoffHz * std::pow(maxCutoffHz / minCutoffHz, normalized);
-        _filter.setCutoff(cutoffHz);
+        _filter.setCutoff(cutoffHzRange.exponential(normalized));
     }
 
     // resonance: 0..1, filter peak at the cutoff frequency. Output is compensated (halved at
@@ -137,10 +137,8 @@ public:
 
 private:
     static constexpr float headroom{2.0F};
-    static constexpr float minCutoffHz{150.0F};
-    static constexpr float maxCutoffHz{5'000.0F};
-    static constexpr float minDecayS{0.2F};
-    static constexpr float maxDecayS{3.0F};
+    static constexpr core::Range cutoffHzRange{150.0F, 5'000.0F};
+    static constexpr core::Range decaySRange{0.2F, 3.0F};
     static constexpr std::array<std::uint32_t, voiceCount> seedTable{
         0x9E3779B9U, 0x85EBCA6BU, 0xC2B2AE35U};
 

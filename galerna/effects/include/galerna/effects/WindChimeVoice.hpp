@@ -1,6 +1,7 @@
 #pragma once
 
 #include "galerna/core/PentatonicScale.hpp"
+#include "galerna/core/Range.hpp"
 #include "galerna/core/WavetableOscillator.hpp"
 #include "galerna/core/Xorshift32.hpp"
 
@@ -52,7 +53,7 @@ public:
     {
         _density = std::clamp(density, 0.0F, 1.0F);
         _spread = std::clamp(spread, 0.0F, 1.0F);
-        _ringDurationS = std::clamp(ringDurationS, minRingDurationS, maxRingDurationS);
+        _ringDurationS = ringDurationSRange.clamp(ringDurationS);
     }
 
     [[gnu::always_inline]] float process()
@@ -92,17 +93,15 @@ private:
     };
 
     static constexpr float silenceThreshold{0.001F};
-    static constexpr float minRingDurationS{0.05F};
-    static constexpr float maxRingDurationS{6.0F};
-    // minIntervalS only bounds the *wait* before a strike, not the strike-to-strike rate: a
+    static constexpr core::Range ringDurationSRange{0.05F, 6.0F};
+    // intervalSRange.min only bounds the *wait* before a strike, not the strike-to-strike rate: a
     // voice can't re-strike until its current ring has decayed below silenceThreshold (see
     // process()), so at maximum density a single voice's real cycle time is close to
-    // ringDurationS + a small jittered fraction of minIntervalS, not minIntervalS itself. The
-    // Decay control (see WindChimes::setDecay()) shortens ringDurationS itself if a faster max
-    // density should be audible on a single voice rather than just tightening how closely
-    // staggered voices in the bank can land on top of each other.
-    static constexpr float minIntervalS{0.05F};
-    static constexpr float maxIntervalS{4.0F};
+    // ringDurationS + a small jittered fraction of intervalSRange.min, not intervalSRange.min
+    // itself. The Decay control (see WindChimes::setDecay()) shortens ringDurationS itself if a
+    // faster max density should be audible on a single voice rather than just tightening how
+    // closely staggered voices in the bank can land on top of each other.
+    static constexpr core::Range intervalSRange{0.05F, 4.0F};
     // Highest octave a strike can be shifted up by, reached at spread == 1.
     static constexpr float maxOctaveSpread{2.0F};
 
@@ -128,9 +127,10 @@ private:
 
     void scheduleNextStrike()
     {
-        // Higher density -> shorter mean wait; a random jitter factor (0.5x-1.5x) keeps voices
-        // from ever locking into a mechanical, repeating cadence.
-        const float meanIntervalS = maxIntervalS - _density * (maxIntervalS - minIntervalS);
+        // Higher density -> shorter mean wait, hence the 1 - _density (intervalSRange.linear()
+        // runs the opposite way: 0 -> min, 1 -> max); a random jitter factor (0.5x-1.5x) keeps
+        // voices from ever locking into a mechanical, repeating cadence.
+        const float meanIntervalS = intervalSRange.linear(1.0F - _density);
         const float jitter = 0.5F + _rng.nextFloat01();
         _samplesUntilNextStrike = static_cast<std::uint32_t>(meanIntervalS * jitter * _sampleRate);
     }
