@@ -3,9 +3,9 @@
 DSP building blocks used by the audio apps in `applications/` — see `docs/architecture.md`
 for how this library fits into the overall directory layout, and `applications/README.md`
 for how each app wires these classes together with pots/buttons/switches. This document
-walks through two of the library's larger composites, `TwinPluck` and `CloudReverb`, block
-by block, since neither is a single self-contained class but a small tree of collaborating
-ones.
+walks through three of the library's larger composites, `TwinPluck`, `AmbientPad`, and
+`CloudReverb`, block by block, since none of them is a single self-contained class but a small
+tree of collaborating ones.
 
 Both composites share the same two `galerna::core` primitives underneath:
 
@@ -86,6 +86,72 @@ contributes 0 — there's no "active voice count" concept, unlike `WindChimes`),
 fixed `1/voiceCount` headroom, runs the sum through the shared `StateVariableFilter`
 (`setTimbre()`/`setResonance()` drive its cutoff/resonance), and writes the identical result
 to both output channels.
+
+## `AmbientPad` — generative ambient drone pad
+
+Inspired by the slowly-evolving, detuned, drifting textures of Aphex Twin's *Selected Ambient
+Works II* — every voice sounds continuously (there's no gating/triggering, unlike `TwinPluck`),
+each independently and slowly re-picking a new pentatonic-scale-quantized note and gliding to it,
+plus a continuous small "tape wobble" pitch random-walk layered on top.
+
+```mermaid
+flowchart TB
+    subgraph AmbientPad
+        v0["DriftVoice 0"]
+        v1["DriftVoice 1"]
+        v2["DriftVoice 2"]
+        v3["DriftVoice 3"]
+
+        v0 --> sum(("Σ × 1/activeVoiceCount"))
+        v1 --> sum
+        v2 --> sum
+        v3 --> sum
+        sum --> filter["core::StateVariableFilter<br/>(timbre = cutoff, resonance)"]
+    end
+    filter --> outL([left output])
+    filter --> outR([right output])
+```
+
+Only the first `activeVoiceCount` voices are summed each block (`setActiveVoiceCount()`, same
+"active voice count" idea as `WindChimes` — there's no gate to silence an unwanted voice here,
+since every `DriftVoice` always produces sound). Unison/chorus thickness comes from a fixed
+per-voice detune ratio (`setDetune()`), spread evenly around 1.0 across the active voices, rather
+than doubling each voice's oscillator count — half the CPU cost of a classic 2-oscillator-per-voice
+unison stack, which matters on a board this CPU-constrained (see `docs/architecture.md`'s Reverb
+section for just how tight the budget already is with `CloudReverb` chained after this).
+
+### `DriftVoice`
+
+One continuously-sounding, self-drifting `core::WavetableOscillator<64>` voice — no `noteOn()`/
+`noteOff()`, no envelope. Two independent drift mechanisms are layered on top of the voice's fixed
+detune ratio, both updated at block rate (once per `updateDrift()` call, not per sample — same
+reasoning as `TwinPluck::DroneWander`, whose block-rate updates cost only +34 cycles on real
+hardware):
+
+```mermaid
+flowchart LR
+    root(("rootFrequencyHz")) --> quant["pentatonic-quantized<br/>target note"]
+    quant -- "one-pole glide<br/>(noteChangeIntervalS)" --> current(("current<br/>frequency"))
+    current --> wobble["±driftDepth<br/>random walk<br/>(wobbleRetargetS)"]
+    wobble --> detune["×detuneRatio<br/>(fixed per voice)"]
+    detune --> osc["WavetableOscillator&lt;64&gt;"]
+    osc --> out([voice output])
+```
+
+- **Harmonic drift**: every `noteChangeIntervalS` seconds (jittered per-voice via its own
+  `core::Xorshift32`, so voices don't lock into the same rhythm), picks a new
+  `core::PentatonicScale`-quantized target frequency (same quantization shape as
+  `PluckVoice::setPendingFrequency()`) and glides toward it with a one-pole filter, so the pad's
+  chord slowly morphs instead of holding a static drone or snapping between notes.
+- **Tape wobble**: a second, independent one-pole-smoothed random walk (own `Xorshift32`, own
+  retarget timer) around the current glide target — the "analog drift" character. Same
+  ratio-random-walk shape as `TwinPluck::DroneWander`, kept as its own copy here rather than
+  shared: that version decorates a *gated* voice at a fixed depth/rate, this one decorates an
+  *always-on* voice at pot-controlled depth/rate.
+- **Freeze/reseed**: `setFrozen(true)` pauses the harmonic-drift layer only (wobble keeps running,
+  so a frozen chord still breathes); `reseed()` forces an immediate note re-target instead of
+  waiting for the jittered timer — a manual "next chord" trigger. Both are exposed on
+  `AmbientPad`/`AmbientDriftApp` as BTN1 (freeze toggle) and BTN2 (reseed).
 
 ## `CloudReverb` — "CloudSeed-lite" algorithmic reverb
 

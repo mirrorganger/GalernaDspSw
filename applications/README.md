@@ -74,6 +74,35 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Drone (root) | `SW1` | Toggles a fixed-pitch drone at the scale root on/off. |
   | Drone (fifth) | `SW2` | Toggles a fixed-pitch drone a perfect fifth above the root on/off. |
 
+- **`ambient_drift/`** — Audio demo: a generative ambient drone pad
+  (`galerna::effects::AmbientPad`, driven by `AmbientDriftApp`), inspired by the slowly-evolving,
+  detuned, drifting textures of Aphex Twin's *Selected Ambient Works II* — a bank of
+  `galerna::effects::DriftVoice` oscillators sound continuously (no triggering), each
+  independently and slowly re-picking a new pentatonic-scale-quantized note and gliding to it
+  (`DriftVoice`'s "harmonic drift"), plus a continuous small "tape wobble" pitch random-walk on
+  top of that. Unison/chorus thickness comes from a fixed detune ratio spread across the active
+  voices rather than doubling oscillator count. Summed and tone-shaped by a resonant lowpass, then
+  chained into `galerna::effects::CloudReverb` (see `wind_chimes`'s entry above and
+  `docs/architecture.md`'s Reverb section) before streaming to line-out over I2S DMA
+  (`Stm32I2sDuplexAudio`). Eight potentiometers control voice density, detune spread, drift/wobble
+  depth, evolve rate, filter timbre/resonance, and reverb mix/size; the status LEDs mirror the
+  active voice count in binary; the two push buttons freeze/reseed the pad's chord (no pitch pots
+  needed — every voice self-drifts). Also brings up the ES8388 codec over I2C before starting the
+  audio engine.
+
+  | Control | Physical pot/control | Effect |
+  |---|---|---|
+  | Density | `POT_3` | How many of the 4 voices are summed (0 = silence). Mirrored on `LED0`-`LED2` in binary. |
+  | Detune | `POT_5` | Unison/chorus spread across active voices, 0 (unison) – 1 (wide, chorus-y detune). |
+  | Drift depth | `POT_1` | "Tape wobble" pitch random-walk depth, 0 (static) – 1 (pronounced drift). |
+  | Evolve rate | `POT_7` | How quickly the pad's chord and wobble move, 0 (glacial) – 1 (restless). |
+  | Timbre | `POT_2` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). |
+  | Resonance | `POT_4` | Filter resonance, 0 (clean) – 1 (near self-oscillation). |
+  | Reverb mix | `POT_6` | Dry/wet blend of the CloudReverb tail, 0 (dry) – 1 (fully wet). |
+  | Reverb size | `POT_8` | How long the reverb tail sustains (late-line feedback gain), 0 (short) – 1 (long, cloudy wash). |
+  | Freeze | `BTN1` (toggle) | Holds the current chord still (stops picking new pentatonic targets); wobble keeps running. |
+  | Reseed | `BTN2` (momentary) | Forces every active voice to immediately pick a new pentatonic target — a manual "next chord". |
+
 - **`pot_blink/`** — Minimal demo (`galerna::app::GalernaApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
   useful as a smoke test for GPIO/ADC/mux wiring independent of the codec/I2S path.
