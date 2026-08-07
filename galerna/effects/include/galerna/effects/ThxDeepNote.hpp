@@ -1,5 +1,6 @@
 #pragma once
 
+#include "galerna/core/Range.hpp"
 #include "galerna/core/StateVariableFilter.hpp"
 #include "galerna/effects/ThxVoice.hpp"
 
@@ -64,8 +65,7 @@ public:
     void setTimbre(float timbre)
     {
         const float normalized = std::clamp(timbre, 0.0F, 1.0F);
-        const float cutoffHz = minCutoffHz * std::pow(maxCutoffHz / minCutoffHz, normalized);
-        _filter.setCutoff(cutoffHz);
+        _filter.setCutoff(cutoffHzRange.exponential(normalized));
     }
 
     // resonance: 0..1, filter peak at the cutoff frequency (0 = clean, 1 = near
@@ -130,8 +130,7 @@ private:
     // times a second, audible as crackle. Lowered until clipCount stayed at 0.
     static constexpr float headroom{1.0F};
     static constexpr float maxPitchShiftHz{500.0F};
-    static constexpr float minCutoffHz{150.0F};
-    static constexpr float maxCutoffHz{5'000.0F};
+    static constexpr core::Range cutoffHzRange{150.0F, 5'000.0F};
     static constexpr std::array<float, voiceCount> lfoRateTableHz{
         5.0F, 9.17F, 13.33F, 17.5F, 21.67F, 25.83F, 30.0F};
 
