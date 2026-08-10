@@ -103,7 +103,7 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Freeze | `BTN1` (toggle) | Holds the current chord still (stops picking new pentatonic targets); wobble keeps running. |
   | Reseed | `BTN2` (momentary) | Forces every active voice to immediately pick a new pentatonic target — a manual "next chord". |
 
-- **`pot_blink/`** — Minimal demo (`galerna::app::PotBlinkApp`): three status LEDs blink at
+- **`pot_blink/`** — Minimal demo (`PotBlinkApp`, defined directly in `app.cpp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
   useful as a smoke test for GPIO/ADC/mux wiring independent of the codec/I2S path.
 
