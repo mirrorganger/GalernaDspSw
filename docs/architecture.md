@@ -204,7 +204,9 @@ leaner `WindChimes`) frees up budget — just re-verify with the same measuremen
   `applications/<name>/app.cpp` and a `galerna_add_app(<name>)` call in
   `applications/CMakeLists.txt`; see that file's `galerna_add_app()` function.
 - `applications/common/`: small pieces shared by every app: `app.h` (the `App_Init`/`App_Tick`
-  declarations) and `SwoDebug.cpp` (SWO `printf` plumbing).
+  declarations), `SwoDebug.cpp` (SWO `printf` plumbing), and `BoardControls.hpp` (the board's
+  fixed status LED/button/switch counts and ADC full-scale value, `galerna::app::ledCount` et
+  al. -- every per-app `*App.hpp` includes it instead of redeclaring its own copies).
 
 ## Build commands
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoardControls.hpp"
 #include "galerna/core/Range.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/hal/AdcConcept.hpp"
@@ -18,10 +19,6 @@ template <hal::Gpio TGpio, hal::Adc TAdc>
 class PotBlinkApp
 {
 public:
-    static constexpr std::size_t ledCount{3};
-    static constexpr std::size_t buttonCount{2};
-    static constexpr std::size_t switchCount{2};
-    static constexpr std::uint16_t potMaxValue{4'095};
     static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
     PotBlinkApp(

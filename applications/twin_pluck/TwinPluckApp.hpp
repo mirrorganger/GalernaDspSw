@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoardControls.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/hal/AdcConcept.hpp"
 #include "galerna/hal/GpioConcept.hpp"
@@ -35,13 +36,6 @@ template <
 class TwinPluckApp
 {
 public:
-    static constexpr std::size_t ledCount{3};
-    static constexpr std::size_t buttonCount{2};
-    // Switches reuse TButton -- both are just a hal::Gpio-concept level to read, same as
-    // pot_blink/app.cpp's buttons and switches both being plain Stm32Gpio.
-    static constexpr std::size_t switchCount{2};
-    static constexpr std::uint16_t potMaxValue{4'095};
-
     struct PotMuxChannels
     {
         std::uint8_t pitch1;

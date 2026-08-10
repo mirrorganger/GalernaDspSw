@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoardControls.hpp"
 #include "galerna/core/BinaryLedDisplay.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/hal/AdcConcept.hpp"
@@ -36,10 +37,6 @@ template <
 class AmbientDriftApp
 {
 public:
-    static constexpr std::size_t ledCount{3};
-    static constexpr std::size_t buttonCount{2};
-    static constexpr std::uint16_t potMaxValue{4'095};
-
     struct PotMuxChannels
     {
         std::uint8_t density;
