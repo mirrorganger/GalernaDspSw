@@ -14,7 +14,7 @@
 namespace galerna::app
 {
 
-template <hal::Gpio TStatusLed, hal::Adc TAdc, hal::Gpio TMuxGpio, hal::Gpio TDigitalIn>
+template <hal::Gpio TGpio, hal::Adc TAdc>
 class PotBlinkApp
 {
 public:
@@ -25,11 +25,11 @@ public:
     static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
     PotBlinkApp(
-        std::array<std::reference_wrapper<TStatusLed>, ledCount> statusLeds,
-        drivers::PotMux4051<TAdc, TMuxGpio>& potMux,
+        std::array<std::reference_wrapper<TGpio>, ledCount> statusLeds,
+        drivers::PotMux4051<TAdc, TGpio>& potMux,
         std::array<std::uint8_t, ledCount> potMuxChannels,
-        std::array<std::reference_wrapper<TDigitalIn>, buttonCount> buttons,
-        std::array<std::reference_wrapper<TDigitalIn>, switchCount> switches,
+        std::array<std::reference_wrapper<TGpio>, buttonCount> buttons,
+        std::array<std::reference_wrapper<TGpio>, switchCount> switches,
         std::uint32_t tickIntervalMs)
         : _statusLeds{statusLeds}
         , _potMux{potMux}
@@ -98,11 +98,11 @@ private:
         return static_cast<std::uint32_t>(500.0F / frequencyHz);
     }
 
-    std::array<std::reference_wrapper<TStatusLed>, ledCount> _statusLeds;
-    drivers::PotMux4051<TAdc, TMuxGpio>& _potMux;
+    std::array<std::reference_wrapper<TGpio>, ledCount> _statusLeds;
+    drivers::PotMux4051<TAdc, TGpio>& _potMux;
     std::array<std::uint8_t, ledCount> _potMuxChannels;
-    std::array<std::reference_wrapper<TDigitalIn>, buttonCount> _buttons;
-    std::array<std::reference_wrapper<TDigitalIn>, switchCount> _switches;
+    std::array<std::reference_wrapper<TGpio>, buttonCount> _buttons;
+    std::array<std::reference_wrapper<TGpio>, switchCount> _switches;
     std::uint32_t _tickIntervalMs;
     std::array<std::uint32_t, ledCount> _elapsedMs{};
     std::array<bool, ledCount> _ledState{};
