@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BoardControls.hpp"
+#include "BoardControls.h"
 #include "galerna/core/Range.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/hal/AdcConcept.hpp"
