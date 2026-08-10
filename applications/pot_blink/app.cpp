@@ -41,15 +41,19 @@ constexpr std::uint32_t appTickIntervalMs{20U};
 constexpr std::uint32_t potPrintIntervalTicks{50U}; // ~1 s at appTickIntervalMs
 
 galerna::app::PotBlinkApp app{
-    {galerna::app::GpioPin{LED_0_GPIO_Port, LED_0_Pin},
-     galerna::app::GpioPin{LED_1_GPIO_Port, LED_1_Pin},
-     galerna::app::GpioPin{LED_2_GPIO_Port, LED_2_Pin}},
+    {galerna::platform::stm32f405::Stm32Gpio{LED_0_GPIO_Port, LED_0_Pin},
+     galerna::platform::stm32f405::Stm32Gpio{LED_1_GPIO_Port, LED_1_Pin},
+     galerna::platform::stm32f405::Stm32Gpio{LED_2_GPIO_Port, LED_2_Pin}},
     potMux,
     ledPotMuxChannels,
-    {galerna::app::GpioPin{PUSH_BTN_0_GPIO_Port, PUSH_BTN_0_Pin},
-     galerna::app::GpioPin{PUSH_BTN_1_GPIO_Port, PUSH_BTN_1_Pin}},
-    {galerna::app::GpioPin{SW_2_GPIO_Port, SW_2_Pin},
-     galerna::app::GpioPin{SW_3_GPIO_Port, SW_3_Pin}},
+    // BTN1/BTN2/SW1/SW2 -> MCU pin, per GalernaDsp.kicad_sch (input_control sheet), verified with
+    // `kicad-cli sch export netlist`. The silkscreen refs don't match the net numbers/names (e.g.
+    // BTN1 -> net PUSH_BTN_0, SW1 -> net SW_2), so this mapping is spelled out here rather than
+    // assumed from the Core/Inc/main.h pin names.
+    {galerna::platform::stm32f405::Stm32Gpio{PUSH_BTN_0_GPIO_Port, PUSH_BTN_0_Pin},
+     galerna::platform::stm32f405::Stm32Gpio{PUSH_BTN_1_GPIO_Port, PUSH_BTN_1_Pin}},
+    {galerna::platform::stm32f405::Stm32Gpio{SW_2_GPIO_Port, SW_2_Pin},
+     galerna::platform::stm32f405::Stm32Gpio{SW_3_GPIO_Port, SW_3_Pin}},
     appTickIntervalMs};
 
 void printPotValues()

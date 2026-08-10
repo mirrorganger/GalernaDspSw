@@ -15,58 +15,28 @@
 namespace galerna::app
 {
 
-// Port/pin identifying a not-yet-constructed Stm32Gpio -- lets PotBlinkApp build its own
-// Stm32Gpio objects from a plain description instead of the caller constructing them upfront.
-struct GpioPin
-{
-    GPIO_TypeDef* port;
-    std::uint16_t pin;
-};
-
-namespace detail
-{
-
-// Index-sequence expansion so std::array<Stm32Gpio, N> can be built element-by-element from
-// pins -- Stm32Gpio has no default constructor, so std::array<Stm32Gpio, N>{} isn't an option.
-// Same trick as PotMux4051's detail::makeChannelBitsTable().
-template <std::size_t N, std::size_t... I>
-std::array<platform::stm32f405::Stm32Gpio, N> makeGpios(
-    const std::array<GpioPin, N>& pins, std::index_sequence<I...>)
-{
-    return {platform::stm32f405::Stm32Gpio{pins[I].port, pins[I].pin}...};
-}
-
-template <std::size_t N>
-std::array<platform::stm32f405::Stm32Gpio, N> makeGpios(const std::array<GpioPin, N>& pins)
-{
-    return makeGpios(pins, std::make_index_sequence<N>{});
-}
-
-} // namespace detail
-
 // Only ever wired up against the real STM32 GPIO/ADC/mux, never against a host fake -- no
 // template parameters needed. Owns its status LEDs/buttons/switches outright (plain
 // Stm32Gpio, not reference_wrapper) since nothing outside this class needs to touch them --
 // unlike _potMux, which is shared with app.cpp's printPotValues() diagnostic and so stays a
-// reference to a longer-lived object. Builds those Stm32Gpio objects itself from GpioPin
-// descriptions rather than having the caller construct them upfront.
+// reference to a longer-lived object.
 class PotBlinkApp
 {
 public:
     static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
     PotBlinkApp(
-        std::array<GpioPin, ledCount> statusLedPins,
+        std::array<platform::stm32f405::Stm32Gpio, ledCount> statusLeds,
         drivers::PotMux4051<platform::stm32f405::Stm32Adc, platform::stm32f405::Stm32Gpio>& potMux,
         std::array<std::uint8_t, ledCount> potMuxChannels,
-        std::array<GpioPin, buttonCount> buttonPins,
-        std::array<GpioPin, switchCount> switchPins,
+        std::array<platform::stm32f405::Stm32Gpio, buttonCount> buttons,
+        std::array<platform::stm32f405::Stm32Gpio, switchCount> switches,
         std::uint32_t tickIntervalMs)
-        : _statusLeds{detail::makeGpios(statusLedPins)}
+        : _statusLeds{std::move(statusLeds)}
         , _potMux{potMux}
         , _potMuxChannels{potMuxChannels}
-        , _buttons{detail::makeGpios(buttonPins)}
-        , _switches{detail::makeGpios(switchPins)}
+        , _buttons{std::move(buttons)}
+        , _switches{std::move(switches)}
         , _tickIntervalMs{tickIntervalMs}
     {
     }
