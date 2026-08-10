@@ -23,12 +23,12 @@ and build commands.
   low-level platform code in `galerna/platform/src/stm32f405/` (thin wrappers directly over
   STM32 HAL calls — these have no meaningful logic to unit test and aren't compiled for the
   host target). If you add logic that isn't a direct HAL passthrough, it belongs in a
-  platform-independent class (`galerna/core`, `galerna/drivers`, `galerna/effects`,
-  `galerna/app`) that takes the platform type as a template parameter, so it can be tested
-  against a `galerna/hal/tests/fakes/*` fake (`galerna::hal::fakes`) instead.
+  platform-independent class (`galerna/core`, `galerna/drivers`, `galerna/effects`) that
+  takes the platform type as a template parameter, so it can be tested against a
+  `galerna/hal/tests/fakes/*` fake (`galerna::hal::fakes`) instead.
 - Match existing driver shape: constructor takes the dependencies by reference, a small public
   API (`read`/`write`/`set`/`get`), concept-checked template parameters, `_memberName` naming.
-- `galerna/` is organized as one CMake library per namespace (`galerna::app`, `galerna::core`,
+- `galerna/` is organized as one CMake library per namespace (`galerna::core`,
   `galerna::drivers`, `galerna::effects`, `galerna::hal`, `galerna::platform`), each with its
   own `CMakeLists.txt` and `include/galerna/<lib>/`, `src/` (compiled libraries only),
   `tests/` layout — see `docs/architecture.md`. Only link the `galerna::<lib>` alias targets,

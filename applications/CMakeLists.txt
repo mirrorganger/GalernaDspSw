@@ -25,12 +25,11 @@ function(galerna_add_app name)
 
     # Every app links the full set of galerna libraries -- which ones an individual
     # app.cpp actually uses varies (e.g. thx_deep_note needs galerna::effects,
-    # pot_blink needs galerna::app), so link them all rather than tuning per app.
+    # pot_blink needs galerna::drivers), so link them all rather than tuning per app.
     target_link_libraries(${name} PRIVATE
         galerna::core
         galerna::effects
         galerna::drivers
-        galerna::app
         galerna::platform
         stm32cubemx
     )

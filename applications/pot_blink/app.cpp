@@ -1,6 +1,6 @@
 #include "app.h"
 
-#include "galerna/app/GalernaApp.hpp"
+#include "PotBlinkApp.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
 #include "galerna/platform/stm32f405/Stm32Adc.hpp"
 #include "galerna/platform/stm32f405/Stm32Gpio.hpp"
@@ -62,7 +62,7 @@ std::array<std::reference_wrapper<galerna::platform::stm32f405::Stm32Gpio>, 2> s
 constexpr std::uint32_t appTickIntervalMs{20U};
 constexpr std::uint32_t potPrintIntervalTicks{50U}; // ~1 s at appTickIntervalMs
 
-galerna::app::GalernaApp app{statusLeds, potMux, ledPotMuxChannels, buttons, switches, appTickIntervalMs};
+galerna::app::PotBlinkApp app{statusLeds, potMux, ledPotMuxChannels, buttons, switches, appTickIntervalMs};
 
 void printPotValues()
 {

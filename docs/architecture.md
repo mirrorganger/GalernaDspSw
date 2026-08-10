@@ -43,9 +43,6 @@ link against the alias, never the plain name.
   `ProcessorChain` expects (e.g. `Bypass`, `Gain`, `ThxDeepNote`, `CloudReverb` — see this doc's
   Reverb section below for `CloudReverb`'s design), plus any supporting types private to one
   effect (e.g. `ThxVoice`, used only by `ThxDeepNote`).
-- `galerna/app/`: product-level Galerna logic reused across more than one app (e.g.
-  `GalernaApp.hpp`). App-specific classes used by only one app live under that app's
-  `applications/<name>/` instead -- see below.
 - `galerna/platform/`: STM32-specific adapters over HAL (`galerna/platform/stm32f405/`),
   the only `galerna/` library that's a real (`STATIC`) build target rather than
   `INTERFACE` -- and the only one with no `tests/`, since it's a thin HAL wrapper with no
@@ -55,7 +52,7 @@ Each library only links the sibling `galerna::*` libraries its headers actually
 `#include` (e.g. `galerna::core` links `galerna::hal` because `BinaryLedDisplay.hpp` uses
 `hal::Gpio`; `galerna::effects` links `galerna::core` because `ThxDeepNote`/`ThxVoice` use
 `StateVariableFilter`/`WavetableOscillator`). `galerna/CMakeLists.txt` just
-`add_subdirectory()`s all six in dependency order.
+`add_subdirectory()`s all five in dependency order.
 
 ## Reverb: `CloudReverb` (`galerna::effects::CloudReverb`)
 

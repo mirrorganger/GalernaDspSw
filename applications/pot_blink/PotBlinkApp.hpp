@@ -15,7 +15,7 @@ namespace galerna::app
 {
 
 template <hal::Gpio TStatusLed, hal::Adc TAdc, hal::Gpio TMuxGpio, hal::Gpio TDigitalIn>
-class GalernaApp
+class PotBlinkApp
 {
 public:
     static constexpr std::size_t ledCount{3};
@@ -24,7 +24,7 @@ public:
     static constexpr std::uint16_t potMaxValue{4'095};
     static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
-    GalernaApp(
+    PotBlinkApp(
         std::array<std::reference_wrapper<TStatusLed>, ledCount> statusLeds,
         drivers::PotMux4051<TAdc, TMuxGpio>& potMux,
         std::array<std::uint8_t, ledCount> potMuxChannels,

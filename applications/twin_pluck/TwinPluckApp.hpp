@@ -98,8 +98,8 @@ public:
         _reverb.setSize(readNormalized(_potMuxChannels.reverbSize));
 
         // Edge-detect each button (active-low: pressed == !get()). No debounce/edge-detection
-        // infrastructure exists elsewhere in this codebase -- GalernaApp only does raw level
-        // polling (see its tick()) -- so this is new, deliberately minimal logic: track the
+        // infrastructure exists elsewhere in this codebase -- pot_blink's PotBlinkApp only does
+        // raw level polling (see its tick()) -- so this is new, deliberately minimal logic: track the
         // previous level and fire noteOn()/noteOff() only on press/release edges, relying on the
         // ~20ms tick period itself as a crude debounce rather than building a general-purpose
         // utility.
@@ -125,7 +125,7 @@ public:
         _statusLeds[2].get().set(false);
 
         // Same edge-detection shape as the buttons above, but switches are active-high (on ==
-        // get(), same polarity pot_blink/GalernaApp already use for SW1/SW2) and drive the
+        // get(), same polarity pot_blink's PotBlinkApp already uses for SW1/SW2) and drive the
         // fixed-pitch drone voices instead -- see TwinPluck's class comment for why a switch's
         // steady on/off position maps naturally onto the same noteOn()/noteOff() gate a button
         // uses.
