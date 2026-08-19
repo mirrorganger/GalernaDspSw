@@ -1,38 +1,19 @@
 #include "app.h"
 
+#include "BoardControls.h"
 #include "PotBlinkApp.hpp"
-#include "galerna/drivers/PotMux4051.hpp"
-#include "galerna/platform/stm32f405/Stm32Adc.hpp"
-#include "galerna/platform/stm32f405/Stm32Gpio.hpp"
 
 #include "main.h"
 
 #include <array>
+#include <cstdint>
 #include <cstdio>
-#include <functional>
-
-extern "C" ADC_HandleTypeDef hadc1;
 
 namespace
 {
 
-galerna::platform::stm32f405::Stm32Adc potMuxAdc{hadc1};
-galerna::platform::stm32f405::Stm32Gpio potMuxSel0{POT_MUX_SEL_0_GPIO_Port, POT_MUX_SEL_0_Pin};
-galerna::platform::stm32f405::Stm32Gpio potMuxSel1{POT_MUX_SEL_1_GPIO_Port, POT_MUX_SEL_1_Pin};
-galerna::platform::stm32f405::Stm32Gpio potMuxSel2{POT_MUX_SEL_2_GPIO_Port, POT_MUX_SEL_2_Pin};
-std::array<std::reference_wrapper<galerna::platform::stm32f405::Stm32Gpio>, 3> potMuxSelectLines{
-    std::ref(potMuxSel0),
-    std::ref(potMuxSel1),
-    std::ref(potMuxSel2)
-};
-galerna::drivers::PotMux4051 potMux{potMuxAdc, potMuxSelectLines, std::uint8_t{0}};
-
-constexpr std::uint8_t potMuxChannelCount{8U};
-
-// Mux channel -> physical potentiometer reference, per GalernaDsp.kicad_sch
-// (input_control sheet, U7 CD4051BM Y-pin nets), verified with `kicad-cli sch export netlist`.
-constexpr std::array<const char*, potMuxChannelCount> potMuxChannelName{
-    "POT_3", "POT_5", "POT_1", "POT_7", "POT_2", "POT_4", "POT_6", "POT_8"};
+galerna::app::BoardControls boardControls{galerna::app::makeBoardControls()};
+auto potMux = galerna::app::makePotMux(boardControls);
 
 // LED0/1/2 blink at a rate driven by POT_1/2/3 respectively.
 constexpr std::array<std::uint8_t, 3> ledPotMuxChannels{2U, 4U, 0U};
@@ -41,27 +22,20 @@ constexpr std::uint32_t appTickIntervalMs{20U};
 constexpr std::uint32_t potPrintIntervalTicks{50U}; // ~1 s at appTickIntervalMs
 
 galerna::app::PotBlinkApp app{
-    {galerna::platform::stm32f405::Stm32Gpio{LED_0_GPIO_Port, LED_0_Pin},
-     galerna::platform::stm32f405::Stm32Gpio{LED_1_GPIO_Port, LED_1_Pin},
-     galerna::platform::stm32f405::Stm32Gpio{LED_2_GPIO_Port, LED_2_Pin}},
+    boardControls.statusLeds,
     potMux,
     ledPotMuxChannels,
-    // BTN1/BTN2/SW1/SW2 -> MCU pin, per GalernaDsp.kicad_sch (input_control sheet), verified with
-    // `kicad-cli sch export netlist`. The silkscreen refs don't match the net numbers/names (e.g.
-    // BTN1 -> net PUSH_BTN_0, SW1 -> net SW_2), so this mapping is spelled out here rather than
-    // assumed from the Core/Inc/main.h pin names.
-    {galerna::platform::stm32f405::Stm32Gpio{PUSH_BTN_0_GPIO_Port, PUSH_BTN_0_Pin},
-     galerna::platform::stm32f405::Stm32Gpio{PUSH_BTN_1_GPIO_Port, PUSH_BTN_1_Pin}},
-    {galerna::platform::stm32f405::Stm32Gpio{SW_2_GPIO_Port, SW_2_Pin},
-     galerna::platform::stm32f405::Stm32Gpio{SW_3_GPIO_Port, SW_3_Pin}},
+    boardControls.buttons,
+    boardControls.switches,
     appTickIntervalMs};
 
 void printPotValues()
 {
     std::printf("Pots:");
-    for (std::uint8_t channel = 0U; channel < potMuxChannelCount; ++channel)
+    for (std::uint8_t channel = 0U; channel < galerna::app::potMuxChannelCount; ++channel)
     {
-        std::printf(" %s=%u", potMuxChannelName[channel], static_cast<unsigned>(potMux.read(channel)));
+        std::printf(
+            " %s=%u", galerna::app::potMuxChannelName[channel], static_cast<unsigned>(potMux.read(channel)));
     }
     std::printf("\r\n");
 }

@@ -15,11 +15,6 @@
 namespace galerna::app
 {
 
-// Only ever wired up against the real STM32 GPIO/ADC/mux, never against a host fake -- no
-// template parameters needed. Owns its status LEDs/buttons/switches outright (plain
-// Stm32Gpio, not reference_wrapper) since nothing outside this class needs to touch them --
-// unlike _potMux, which is shared with app.cpp's printPotValues() diagnostic and so stays a
-// reference to a longer-lived object.
 class PotBlinkApp
 {
 public:
