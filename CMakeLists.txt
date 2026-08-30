@@ -60,7 +60,6 @@ if(GALERNA_BUILD_TESTS)
         galerna::core
         galerna::effects
         galerna::drivers
-        galerna::app
         galerna::hal
         galerna::hal::fakes
     )

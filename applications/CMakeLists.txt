@@ -8,6 +8,9 @@ function(galerna_add_app name)
     add_executable(${name})
     target_sources(${name} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/${name}/app.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/AudioLoadMonitor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/BoardControls.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/common/CodecBringup.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/common/SwoDebug.cpp
         # Directly on the executable target, not in galerna::platform (a static archive):
         # HAL's own stm32f4xx_hal_i2s_ex.c.o both calls and __weak-defines these same
@@ -25,12 +28,11 @@ function(galerna_add_app name)
 
     # Every app links the full set of galerna libraries -- which ones an individual
     # app.cpp actually uses varies (e.g. thx_deep_note needs galerna::effects,
-    # pot_blink needs galerna::app), so link them all rather than tuning per app.
+    # pot_blink needs galerna::drivers), so link them all rather than tuning per app.
     target_link_libraries(${name} PRIVATE
         galerna::core
         galerna::effects
         galerna::drivers
-        galerna::app
         galerna::platform
         stm32cubemx
     )

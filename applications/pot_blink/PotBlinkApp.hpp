@@ -1,41 +1,37 @@
 #pragma once
 
+#include "BoardControls.h"
 #include "galerna/core/Range.hpp"
 #include "galerna/drivers/PotMux4051.hpp"
-#include "galerna/hal/AdcConcept.hpp"
-#include "galerna/hal/GpioConcept.hpp"
+#include "galerna/platform/stm32f405/Stm32Adc.hpp"
+#include "galerna/platform/stm32f405/Stm32Gpio.hpp"
 
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <functional>
 #include <ranges>
+#include <utility>
 
 namespace galerna::app
 {
 
-template <hal::Gpio TStatusLed, hal::Adc TAdc, hal::Gpio TMuxGpio, hal::Gpio TDigitalIn>
-class GalernaApp
+class PotBlinkApp
 {
 public:
-    static constexpr std::size_t ledCount{3};
-    static constexpr std::size_t buttonCount{2};
-    static constexpr std::size_t switchCount{2};
-    static constexpr std::uint16_t potMaxValue{4'095};
     static constexpr core::Range blinkFrequencyHzRange{0.5F, 8.0F};
 
-    GalernaApp(
-        std::array<std::reference_wrapper<TStatusLed>, ledCount> statusLeds,
-        drivers::PotMux4051<TAdc, TMuxGpio>& potMux,
+    PotBlinkApp(
+        std::array<platform::stm32f405::Stm32Gpio, ledCount> statusLeds,
+        drivers::PotMux4051<platform::stm32f405::Stm32Adc, platform::stm32f405::Stm32Gpio>& potMux,
         std::array<std::uint8_t, ledCount> potMuxChannels,
-        std::array<std::reference_wrapper<TDigitalIn>, buttonCount> buttons,
-        std::array<std::reference_wrapper<TDigitalIn>, switchCount> switches,
+        std::array<platform::stm32f405::Stm32Gpio, buttonCount> buttons,
+        std::array<platform::stm32f405::Stm32Gpio, switchCount> switches,
         std::uint32_t tickIntervalMs)
-        : _statusLeds{statusLeds}
+        : _statusLeds{std::move(statusLeds)}
         , _potMux{potMux}
         , _potMuxChannels{potMuxChannels}
-        , _buttons{buttons}
-        , _switches{switches}
+        , _buttons{std::move(buttons)}
+        , _switches{std::move(switches)}
         , _tickIntervalMs{tickIntervalMs}
     {
     }
@@ -44,7 +40,7 @@ public:
     {
         for (auto& statusLed : _statusLeds)
         {
-            statusLed.get().set(false);
+            statusLed.set(false);
         }
     }
 
@@ -54,12 +50,12 @@ public:
     void tick()
     {
         // Buttons are active-low (pressed pulls the pin to GND through a pull-up).
-        const bool paused = std::ranges::any_of(_buttons, [](auto& button) { return !button.get().get(); });
+        const bool paused = std::ranges::any_of(_buttons, [](auto& button) { return !button.get(); });
 
         std::array<bool, ledCount> ledEnabled{true, true, true};
         for (auto [enabled, toggleSwitch] : std::views::zip(ledEnabled, _switches))
         {
-            enabled = toggleSwitch.get().get();
+            enabled = toggleSwitch.get();
         }
 
         for (auto [led, channel, elapsedMs, ledState, enabled] :
@@ -69,7 +65,7 @@ public:
             {
                 elapsedMs = 0U;
                 ledState = false;
-                led.get().set(false);
+                led.set(false);
                 continue;
             }
 
@@ -85,7 +81,7 @@ public:
             {
                 elapsedMs = 0U;
                 ledState = !ledState;
-                led.get().set(ledState);
+                led.set(ledState);
             }
         }
     }
@@ -98,11 +94,11 @@ private:
         return static_cast<std::uint32_t>(500.0F / frequencyHz);
     }
 
-    std::array<std::reference_wrapper<TStatusLed>, ledCount> _statusLeds;
-    drivers::PotMux4051<TAdc, TMuxGpio>& _potMux;
+    std::array<platform::stm32f405::Stm32Gpio, ledCount> _statusLeds;
+    drivers::PotMux4051<platform::stm32f405::Stm32Adc, platform::stm32f405::Stm32Gpio>& _potMux;
     std::array<std::uint8_t, ledCount> _potMuxChannels;
-    std::array<std::reference_wrapper<TDigitalIn>, buttonCount> _buttons;
-    std::array<std::reference_wrapper<TDigitalIn>, switchCount> _switches;
+    std::array<platform::stm32f405::Stm32Gpio, buttonCount> _buttons;
+    std::array<platform::stm32f405::Stm32Gpio, switchCount> _switches;
     std::uint32_t _tickIntervalMs;
     std::array<std::uint32_t, ledCount> _elapsedMs{};
     std::array<bool, ledCount> _ledState{};
