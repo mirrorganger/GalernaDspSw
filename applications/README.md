@@ -103,6 +103,36 @@ libraries — only `app.cpp` (and any app-specific classes next to it) differs.
   | Freeze | `BTN1` (toggle) | Holds the current chord still (stops picking new pentatonic targets); wobble keeps running. |
   | Reseed | `BTN2` (momentary) | Forces every active voice to immediately pick a new pentatonic target — a manual "next chord". |
 
+- **`granular_cloud/`** — Audio demo: a granular-synthesis texture generator
+  (`galerna::effects::GranularCloud`, driven by `GranularCloudApp`). A fixed-pitch
+  `core::WavetableOscillator` drone continuously feeds a `galerna::effects::GrainBuffer` (a
+  circular capture buffer — there is no working line-in on this board, so like every other
+  generative app here, the source is internal, not live), and a pool of
+  `galerna::effects::Grain` "voices" scatter enveloped fragments of that buffer's recent history
+  back out, each at its own randomized start position and playback rate, scheduled at a jittered
+  interval (`galerna/effects/README.md`'s `GranularCloud` section has the full design and CPU
+  cost notes). Summed and tone-shaped by a resonant lowpass, then chained into
+  `galerna::effects::CloudReverb` (see `wind_chimes`'s entry above and `docs/architecture.md`'s
+  Reverb section) before streaming to line-out over I2S DMA (`Stm32I2sDuplexAudio`). Eight
+  potentiometers control grain size, density, spray (position scatter), pitch spread, filter
+  timbre/resonance, and reverb mix/size; the status LEDs mirror the live active grain count in
+  binary (a fluctuating diagnostic of the scheduler, not a static control mirror); the two push
+  buttons freeze the captured material or force an immediate "stutter" retrigger. Also brings up
+  the ES8388 codec over I2C before starting the audio engine.
+
+  | Control | Physical pot/control | Effect |
+  |---|---|---|
+  | Grain size | `POT_3` | Grain length, exponential 10 ms (glitchy) – 150 ms (smeared). |
+  | Density | `POT_5` | How often new grains are scheduled, ~2 (sparse) – 40 (dense) grains/sec. |
+  | Spray | `POT_1` | Start-position scatter across the captured buffer, 0 (fixed, repeating) – 1 (widely scattered, washy). |
+  | Pitch spread | `POT_7` | Per-grain random playback-rate deviation, 0 (no shift) – 1 (wide "shimmer"). |
+  | Timbre | `POT_2` | Filter cutoff, exponential 150 Hz (dark) – 5 kHz (bright). |
+  | Resonance | `POT_4` | Filter resonance, 0 (clean) – 1 (near self-oscillation). |
+  | Reverb mix | `POT_6` | Dry/wet blend of the CloudReverb tail, 0 (dry) – 1 (fully wet). |
+  | Reverb size | `POT_8` | How long the reverb tail sustains (late-line feedback gain), 0 (short) – 1 (long, cloudy wash). |
+  | Freeze | `BTN1` (toggle) | Stops writing new material into the captured buffer; the grain pool keeps granulating the frozen snapshot. |
+  | Stutter | `BTN2` (momentary) | Forces every grain-pool slot to spawn a fresh grain immediately — an accent/glitch retrigger. |
+
 - **`pot_blink/`** — Minimal demo (`galerna::app::PotBlinkApp`): three status LEDs blink at
   rates set by three potentiometers, with buttons/switches read alongside. No audio path;
   useful as a smoke test for GPIO/ADC/mux wiring independent of the codec/I2S path.

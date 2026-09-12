@@ -15,6 +15,9 @@ if(GALERNA_BUILD_TESTS)
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverb.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestCloudReverbLine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestDriftVoice.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestGrain.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestGrainBuffer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestGranularCloud.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedAllpass.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestModulatedDelayLine.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/TestMultitapDelay.cpp

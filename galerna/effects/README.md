@@ -3,9 +3,9 @@
 DSP building blocks used by the audio apps in `applications/` — see `docs/architecture.md`
 for how this library fits into the overall directory layout, and `applications/README.md`
 for how each app wires these classes together with pots/buttons/switches. This document
-walks through three of the library's larger composites, `TwinPluck`, `AmbientPad`, and
-`CloudReverb`, block by block, since none of them is a single self-contained class but a small
-tree of collaborating ones.
+walks through four of the library's larger composites, `TwinPluck`, `AmbientPad`,
+`GranularCloud`, and `CloudReverb`, block by block, since none of them is a single self-contained
+class but a small tree of collaborating ones.
 
 Both composites share the same two `galerna::core` primitives underneath:
 
@@ -152,6 +152,81 @@ flowchart LR
   so a frozen chord still breathes); `reseed()` forces an immediate note re-target instead of
   waiting for the jittered timer — a manual "next chord" trigger. Both are exposed on
   `AmbientPad`/`AmbientDriftApp` as BTN1 (freeze toggle) and BTN2 (reseed).
+
+## `GranularCloud` — granular-synthesis texture generator
+
+Builds a texture out of many short, enveloped fragments ("grains") of an internally-captured
+signal rather than a bank of continuously-sounding oscillators (`AmbientPad`) or gated ones
+(`TwinPluck`). There is no working line-in on this board (see `docs/progress.md`), so — like
+every other generative app here — the "recording" being granulated is a fixed-pitch
+`core::WavetableOscillator` drone, not a live signal.
+
+```mermaid
+flowchart TB
+    subgraph GranularCloud
+        src["WavetableOscillator&lt;64&gt;<br/>(fixed-pitch drone)"] -- "write() every sample<br/>(unless frozen)" --> gb["GrainBuffer&lt;8192&gt;<br/>(circular capture buffer)"]
+
+        sched["scheduler<br/>(jittered interval, ~density)"] -. "trigger()<br/>free pool slot" .-> g0["Grain 0"]
+        sched -. trigger .-> g1["Grain 1"]
+        sched -. trigger .-> gN["Grain 5"]
+
+        gb -- "readAt(position)" --> g0
+        gb -- "readAt(position)" --> g1
+        gb -- "readAt(position)" --> gN
+
+        g0 --> sum(("Σ × headroom/poolSize"))
+        g1 --> sum
+        gN --> sum
+        sum --> filter["core::StateVariableFilter<br/>(timbre = cutoff, resonance)"]
+    end
+    filter --> outL([left output])
+    filter --> outR([right output])
+```
+
+### `GrainBuffer`
+
+A plain circular audio buffer: `write()` every sample, `readAt(delaySamples)` for an externally
+supplied fractional offset. Unlike `ModulatedDelayLine` (which owns its own LFO and always reads
+at "now minus its own wobbling delay"), several independent `Grain`s each need to read this same
+shared buffer at their own, independently-advancing offset — so the offset comes in as a
+parameter instead of being computed internally. Same linear-interpolation technique as
+`ModulatedDelayLine::readDelayed()`/`WavetableOscillator::interpolate()`.
+
+### `Grain`
+
+One pool slot: silent until `trigger(startDelaySamples, playbackRate, durationSamples)`, then
+reads through a `GrainBuffer` for `durationSamples`, enveloped, then goes inactive again. No
+RNG/scheduling of its own — `GranularCloud` decides when and how to trigger each slot, the same
+"caller decides" split as `PluckVoice`'s `noteOn()`/`noteOff()`.
+
+- **Pitch via delay modulation**: `playbackRate != 1.0` changes the grain's read lag relative to
+  the buffer's advancing write pointer over its lifetime — the same delay-modulation-as-
+  pitch-shift technique `ModulatedDelayLine`'s LFO wobble already relies on, just driven by a
+  fixed rate instead of an LFO. At `playbackRate == 1.0` the lag stays constant for the grain's
+  whole life.
+- **Envelope**: an incrementally-computed parabola (`e(t) = 4t(1-t)` over the grain's duration,
+  zero at both ends, peak 1 at the midpoint), generated via constant-second-difference forward
+  differencing — 2 additions per sample, no table, no trig (Ross Bencina, ["Implementing
+  Real-Time Granular
+  Synthesis"](http://www.rossbencina.com/static/code/granular-synthesis/BencinaAudioAnecdotes310801.pdf)).
+  Deliberately not a lookup table like this codebase's other windows/waveforms
+  (`WavetableOscillator`, `ModulatedDelayLine`'s LFO): a table read here would be a *second*
+  interpolated memory read per grain per sample on top of the `GrainBuffer` read itself, on
+  hardware that's already CPU-bound (see the CPU-cost section below).
+
+### Scheduling and controls
+
+A jittered per-sample countdown (same shape as `WindChimeVoice`'s strike scheduling) triggers a
+new grain into a free pool slot at a rate driven by `setDensity()`. Each new grain's start
+position is scattered within a safe sub-range of `GrainBuffer`'s history — reserved wide enough
+on both ends that even the largest `setPitchSpread()`-driven playback-rate deviation can't drift
+a grain's position out of bounds over its full duration — scaled by `setSpray()` (0 = every grain
+reads the same fixed lag, a static repeating texture; 1 = scattered across the whole safe range,
+a washy cloud). `setFrozen(true)` stops writing new material into `GrainBuffer` so the pool keeps
+granulating a fixed snapshot instead of the live drone — the genre-standard "freeze" control
+(e.g. Mutable Instruments Clouds). `retriggerAll()` force-triggers every pool slot at once, a
+manual "stutter" accent. Both are exposed on `GranularCloud`/`GranularCloudApp` as BTN1 (freeze
+toggle) and BTN2 (stutter).
 
 ## `CloudReverb` — "CloudSeed-lite" algorithmic reverb
 

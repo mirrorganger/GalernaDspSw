@@ -86,6 +86,20 @@
       "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/ambient_drift.elf verify reset exit\"",
       "dependsOn": "Galerna: STM32 Release Build",
       "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash granular_cloud (Debug)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Debug/applications/granular_cloud.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Debug Build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galerna: Flash granular_cloud (Release)",
+      "type": "shell",
+      "command": "openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c \"program build/Release/applications/granular_cloud.elf verify reset exit\"",
+      "dependsOn": "Galerna: STM32 Release Build",
+      "problemMatcher": []
     }
   ]
 }
